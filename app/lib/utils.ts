@@ -1,4 +1,35 @@
+import axios from 'axios';
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from './config';
+import { jwtDecode } from 'jwt-decode';
 import { Revenue } from './definitions';
+
+export const isValidToken = (accessToken: string) => {
+  if (!accessToken) {
+    return false;
+  }
+  const decoded = jwtDecode(accessToken);
+  const currentTime = Date.now() / 1000;
+
+  return (decoded.exp as number) > currentTime;
+};
+
+export const cloudinaryUpload = async (image: File) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', image);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET as string);
+    const response = await axios({
+      url: `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      method: 'POST',
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    const imageUrl = response.data.secure_url;
+    return imageUrl;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {

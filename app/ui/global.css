@@ -16,3 +16,9 @@ input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+textarea:focus,
+input[type='text']:focus {
+  outline: none;
+  --tw-ring-shadow: 0;
+}
