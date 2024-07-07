@@ -19,7 +19,9 @@ export default function AccountMenu({
       </Box>
       <Stack sx={{ px: 2 }}>
         <Typography sx={{ fontWeight: 'bold' }}>{user?.displayName}</Typography>
-        <Typography>@{user?.username}</Typography>
+        <Typography sx={{ color: 'rgb(83, 100, 113)' }}>
+          @{user?.username}
+        </Typography>
       </Stack>
       <Box sx={{ width: '30px', height: '30px', mr: 2 }}>
         <EllipsisHorizontalIcon />

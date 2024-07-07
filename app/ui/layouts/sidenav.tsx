@@ -9,7 +9,7 @@ export default function SideNav() {
     <Stack sx={{ alignItems: 'flex-start', mt: 2 }}>
       <Link
         className="mb-2 flex h-20 items-end justify-start rounded-md bg-blue-600 p-4"
-        href="/home"
+        href="/main/home"
       >
         <Box className="w-32 text-white md:w-40">
           <AcmeLogo />
@@ -19,9 +19,11 @@ export default function SideNav() {
         <NavLinks />
       </Box>
       <Box>
-        <Button variant="contained" sx={{ mt: 2 }}>
-          Post
-        </Button>
+        <Link href="/compose/post" prefetch={false}>
+          <Button variant="contained" sx={{ mt: 2 }}>
+            Post
+          </Button>
+        </Link>
       </Box>
     </Stack>
   );

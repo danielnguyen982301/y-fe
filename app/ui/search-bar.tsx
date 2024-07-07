@@ -3,7 +3,7 @@
 import { XCircleIcon } from '@heroicons/react/20/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Box, Menu, MenuItem, TextField, Typography } from '@mui/material';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { Hashtag, User } from '../lib/definitions';
 import apiService from '../lib/apiService';
 import TagSuggestionCard from './suggestions/tag-suggestion-card';
@@ -71,6 +71,10 @@ export default function SearchBar({ query }: { query: string }) {
     router.push(`/explore?q=${transformedSearch}`);
   };
 
+  useEffect(() => {
+    setSearchText(query);
+  }, [query]);
+
   return (
     <form style={{ width: '350px' }} onSubmit={handleSearchSubmit}>
       <TextField
@@ -124,11 +128,16 @@ export default function SearchBar({ query }: { query: string }) {
               <MenuItem
                 sx={{ width: '100%' }}
                 key={tag._id}
-                onClick={() => setAncholEl(null)}
+                onClick={() => {
+                  router.push(
+                    `/explore?q=${encodeURIComponent(`#${tag.name}`)}`,
+                  );
+                  setAncholEl(null);
+                }}
               >
-                <Link href={`/explore?q=%23${tag.name}`}>
-                  <TagSuggestionCard tag={tag} />
-                </Link>
+                {/* <Link href={`/explore?q=${encodeURIComponent(`#${tag.name}`)}`}> */}
+                <TagSuggestionCard tag={tag} />
+                {/* </Link> */}
               </MenuItem>
             ))}
           {!!userSuggestions.length &&

@@ -33,31 +33,29 @@ export const authConfig = {
     async authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.accessToken && isValidToken(auth.accessToken);
       const isOnMainRoute =
-        nextUrl.pathname.startsWith('/') &&
-        nextUrl.pathname !== '/login' &&
-        nextUrl.pathname !== '/register';
-      if (nextUrl.pathname === '/' && isLoggedIn)
-        return Response.redirect(new URL('/home', nextUrl));
+        nextUrl.pathname.startsWith('/main') ||
+        nextUrl.pathname.startsWith('/compose') ||
+        nextUrl.pathname.startsWith('/settings');
+      if (
+        nextUrl.pathname === '/' ||
+        (nextUrl.pathname === '/main' && isLoggedIn)
+      )
+        return Response.redirect(new URL('/main/home', nextUrl));
       if (isOnMainRoute) {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page
       } else if (isLoggedIn) {
-        return Response.redirect(new URL('/home', nextUrl));
+        return Response.redirect(new URL('/main/home', nextUrl));
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, session, trigger }) {
       if (user) {
         token.accessToken = user.accessToken;
         token.currentUser = { ...(omit(user, 'accessToken') as CurrentUser) };
-        // const userFields = Object.keys(user);
-        // userFields.forEach((field) => {token[field] = user[field as keyof typeof user]})
-        // token.accessToken = user.accessToken;
-
-        // const payload: CustomJwtPayload = jwt.decode(
-        //   user.accessToken as string,
-        // ) as CustomJwtPayload;
-        // token.userId = payload._id;
+      }
+      if (trigger === 'update' && session?.currentUser) {
+        token.currentUser = session.currentUser;
       }
 
       return token;

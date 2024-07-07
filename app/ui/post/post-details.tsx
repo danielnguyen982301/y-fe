@@ -13,62 +13,39 @@ import { useUserData } from '@/app/lib/hooks';
 import Link from 'next/link';
 import apiService from '@/app/lib/apiService';
 import { useSession } from 'next-auth/react';
+import { transformedContent } from '../form/form-mention-textfield';
+import DeleteConfirmModal from '../modal/delete-confirm-modal';
+import { useRouter } from 'next/navigation';
 
 export default function PostDetails({
   post,
-  isRepost,
+  newReplyCount,
 }: {
   post: Post;
-  isRepost?: boolean;
+  newReplyCount?: number;
 }) {
   const { data } = useSession();
+  const router = useRouter();
   const [anchorEl, setAncholEl] = useState<HTMLElement | null>(null);
   const [imageSizes, setImageSizes] = useState({ width: 0, height: 0 });
-  const relationship = post.author.relationship;
+  const [openModal, setOpenModal] = useState(false);
+  const relationship = post?.author.relationship;
   const [isFollowed, setIsFollowed] = useState(
     relationship === 'followedByCurrentUser' ||
       relationship === 'followEachOther',
   );
 
-  const transformContent = (content: string) => {
-    const regex = /(#\w+)/gm;
+  const transformedPostContent = transformedContent({
+    content: post?.content,
+    regex: /(#\w+)/gm,
+  });
 
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-
-    while ((match = regex.exec(content)) !== null) {
-      if (lastIndex < match.index) {
-        parts.push(content.substring(lastIndex, match.index));
-      }
-
-      parts.push(
-        <Link
-          className="hover:underline"
-          href={`/explore?q=${match[1]}`}
-          style={{ color: 'rgb(29, 155, 240)' }}
-          key={match.index}
-        >
-          {match[1]}
-        </Link>,
-      );
-
-      lastIndex = match.index + match[0].length;
-    }
-
-    if (lastIndex < content.length) {
-      parts.push(content.substring(lastIndex));
-    }
-
-    return parts;
-  };
-
-  const postDate = new Date(post.createdAt);
+  const postDate = new Date(post?.createdAt);
 
   useEffect(() => {
-    if (post.mediaFile) {
+    if (post?.mediaFile) {
       const img = new Image();
-      img.src = post.mediaFile;
+      img.src = post?.mediaFile;
       img.onload = () => {
         setImageSizes({ width: img.naturalWidth, height: img.naturalHeight });
       };
@@ -88,107 +65,194 @@ export default function PostDetails({
   };
 
   return (
-    <Stack sx={{ width: '100%' }}>
-      {/* {isRepost && (
-        <Box>
-          <Box>
-            <ArrowPathRoundedSquareIcon />
-          </Box>
-          <Box>{}</Box>
-        </Box>
-      )} */}
-      <Box
-        sx={{
-          display: 'flex',
-          width: '100%',
-          p: 1,
-          // borderTop: '1px solid rgb(239, 243, 244)',
-          borderBottom: '1px solid rgb(239, 243, 244)',
-        }}
-      >
-        <Stack>
-          <Avatar src={post.author.avatar} alt={post.author.username} />
-        </Stack>
-        <Stack sx={{ flexGrow: 1, pl: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Box>
-              <Typography component="span" sx={{ pr: 1 }}>
-                {post.author.displayName}
-              </Typography>
-              <Typography component="span" sx={{ color: 'grey' }}>
-                @{post.author.username}
-              </Typography>
-              {/* <Typography
-                component="span"
+    <>
+      <Stack sx={{ width: '100%' }}>
+        <Stack
+          sx={{
+            width: '100%',
+            p: 1,
+            // borderBottom: '1px solid rgb(239, 243, 244)',
+          }}
+        >
+          <Box sx={{ display: 'flex', width: '100%', p: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Avatar src={post?.author.avatar} alt={post?.author.username} />
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexGrow: 1,
+                pl: 1,
+              }}
+            >
+              <Stack>
+                <Box>
+                  <Typography
+                    sx={{
+                      color: 'rgb(15, 20, 25)',
+                      fontWeight: 'bold',
+                      fontSize: 15,
+                    }}
+                  >
+                    {post?.author.displayName}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography sx={{ color: 'rgb(83, 100, 113)', fontSize: 15 }}>
+                    @{post?.author.username}
+                  </Typography>
+                </Box>
+              </Stack>
+              <Box
                 sx={{
+                  display: 'flex',
+                  position: 'relative',
+                  right: 8,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    position: 'absolute',
+                    alignItems: 'center',
+                    height: '40px',
+                    width: '40px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      bgcolor: 'rgba(29,155,240,0.1)',
+                      color: 'rgb(29,155,240)',
+                      borderRadius: '50%',
+                    },
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAncholEl(e.currentTarget);
+                  }}
+                >
+                  <EllipsisHorizontalIcon width={25} height={25} />
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+          <Stack sx={{ flexGrow: 1, px: 1, pb: 1 }}>
+            <Box sx={{ py: 1 }}>{transformedPostContent}</Box>
+            {post?.mediaFile && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  pb: 1,
+                }}
+              >
+                <NextImage
+                  src={post?.mediaFile}
+                  alt="post-image"
+                  width={imageSizes.width > 510 ? 510 : imageSizes.width}
+                  height={imageSizes.height}
+                />
+              </Box>
+            )}
+            <Box sx={{ display: 'flex' }}>
+              <Typography sx={{ color: 'rgb(83, 100, 113)', fontSize: 15 }}>
+                {postDate.toLocaleString('en-US', {
+                  hour: 'numeric',
+                  minute: 'numeric',
+                })}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: 15,
+                  color: 'rgb(83, 100, 113)',
                   '&::before': {
                     content: `"•"`,
                     mx: 1,
                   },
                 }}
               >
-                {postTime}
-              </Typography> */}
+                {postDate.toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: 15,
+                  color: 'rgb(83, 100, 113)',
+                  '&::before': {
+                    content: `"•"`,
+                    mx: 1,
+                  },
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{ fontWeight: 'bold', color: 'black' }}
+                >
+                  {post?.viewCount}
+                </Typography>{' '}
+                Views
+              </Typography>
             </Box>
-            <Box
-              sx={{ height: '25px', width: '25px', cursor: 'pointer' }}
-              onClick={(e) => setAncholEl(e.currentTarget)}
-            >
-              <EllipsisHorizontalIcon />
-            </Box>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorEl)}
-              onClose={() => setAncholEl(null)}
-            >
-              {data?.currentUser._id === post.author._id ? (
-                <Box>
-                  <MenuItem>Edit</MenuItem>
-                  <MenuItem>Delete</MenuItem>
-                </Box>
-              ) : (
-                <MenuItem onClick={() => handleToggleFollow(post.author._id)}>
-                  {isFollowed ? 'Unfollow' : 'Follow'} @{post.author.username}
-                </MenuItem>
-              )}
-            </Menu>
-          </Box>
-          <Box sx={{ py: 1 }}>{transformContent(post.content)}</Box>
-          {post.mediaFile && (
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                pb: 1,
-              }}
-            >
-              <NextImage
-                src={post.mediaFile}
-                alt="post-image"
-                width={imageSizes.width > 510 ? 510 : imageSizes.width}
-                height={imageSizes.height}
-              />
-            </Box>
-          )}
-          <Box>
-            <Typography component="span"></Typography>
-            <Typography component="span"></Typography>
-            <Typography component="span"></Typography>
-          </Box>
-          <PostStats post={post} />
+            <PostStats post={post} newReplyCount={newReplyCount} detailed />
+          </Stack>
         </Stack>
-      </Box>
-    </Stack>
+      </Stack>
+      <Menu
+        id="menu-appbar"
+        onClick={() => setAncholEl(null)}
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        keepMounted
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        open={Boolean(anchorEl)}
+        onClose={() => setAncholEl(null)}
+      >
+        {data?.currentUser._id === post?.author._id ? (
+          <Box>
+            <MenuItem
+              sx={{ fontWeight: 'bold' }}
+              onClick={() => router.push(`/compose/edit/post/${post._id}`)}
+            >
+              Edit
+            </MenuItem>
+            <MenuItem
+              sx={{ fontWeight: 'bold' }}
+              onClick={() => setOpenModal(true)}
+            >
+              Delete
+            </MenuItem>
+          </Box>
+        ) : (
+          <MenuItem onClick={() => handleToggleFollow(post?.author._id)}>
+            {isFollowed ? 'Unfollow' : 'Follow'} @{post?.author.username}
+          </MenuItem>
+        )}
+      </Menu>
+      <DeleteConfirmModal
+        open={openModal}
+        setOpen={setOpenModal}
+        targetType="post"
+        targetId={post?._id}
+        chainedOrDetailed
+      />
+    </>
   );
 }

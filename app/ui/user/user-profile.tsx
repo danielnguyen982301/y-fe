@@ -1,18 +1,41 @@
+'use client';
+
+import apiService from '@/app/lib/apiService';
 import { User } from '@/app/lib/definitions';
 import { CalendarDaysIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Avatar, Box, Button, Stack, Typography } from '@mui/material';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function UserProfile({ user }: { user: User }) {
+  const { data } = useSession();
   const pathname = usePathname();
   const router = useRouter();
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFollowed, setIsFollowed] = useState(
+    user?.relationship === 'followedByCurrentUser' ||
+      user?.relationship === 'followEachOther',
+  );
+
   const createdDate = new Date(user?.createdAt);
   const transformedDate = createdDate.toLocaleString('en-US', {
     month: 'long',
     year: 'numeric',
   });
+
+  const handleToggleFollow = async (userId: string) => {
+    try {
+      isFollowed
+        ? await apiService.delete('/follows', { data: { followeeId: userId } })
+        : await apiService.post('/follows', { followeeId: userId });
+      setIsFollowed(!isFollowed);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Stack sx={{ width: '100%' }}>
       <Box
@@ -46,17 +69,30 @@ export default function UserProfile({ user }: { user: User }) {
           />
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
-          <Button
-            variant="outlined"
-            sx={{
-              borderRadius: 9999,
-              borderColor: 'lightgray',
-              color: 'black',
-              fontWeight: 'bold',
-            }}
-          >
-            Set up profile
-          </Button>
+          {user?._id === data?.currentUser._id ? (
+            <Button
+              onClick={() => router.push('/settings/profile')}
+              variant="outlined"
+              sx={{
+                borderRadius: 9999,
+                borderColor: 'lightgray',
+                color: 'black',
+                fontWeight: 'bold',
+              }}
+            >
+              Set up profile
+            </Button>
+          ) : (
+            <Button
+              sx={{ width: '100px' }}
+              variant="contained"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              onClick={() => handleToggleFollow(user._id)}
+            >
+              {!isFollowed ? 'Follow' : isHovered ? 'Unfollow' : 'Following'}
+            </Button>
+          )}
         </Box>
       </Box>
       <Stack sx={{ p: 2 }}>
@@ -71,18 +107,22 @@ export default function UserProfile({ user }: { user: User }) {
           </Typography>
         </Box>
         {!!user?.bio && (
-          <Box>
+          <Box sx={{ mt: 1.5 }}>
             <Typography>{user?.bio}</Typography>
           </Box>
         )}
-        <Box>
+        <Box sx={{ display: 'flex', my: 1 }}>
           {!!user?.location && (
-            <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <MapPinIcon className="h-5 w-5" />
-              <Typography>{user?.location}</Typography>
+              <Typography
+                sx={{ color: 'rgb(83, 100, 113)', fontSize: '15px', ml: 1 }}
+              >
+                {user?.location}
+              </Typography>
             </Box>
           )}
-          <Box sx={{ display: 'flex', alignItems: 'center', my: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 1.5 }}>
             <CalendarDaysIcon className="h-5 w-5" />
             <Typography
               sx={{ color: 'rgb(83, 100, 113)', fontSize: '15px', ml: 1 }}

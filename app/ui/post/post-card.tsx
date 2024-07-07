@@ -1,9 +1,9 @@
 'use client';
 
-import { Post, Thread } from '@/app/lib/definitions';
+import { Post, Reply, Thread } from '@/app/lib/definitions';
 import { Avatar, Box, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import NextImage from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import PostStats from './post-stats';
 import {
   ArrowPathRoundedSquareIcon,
@@ -13,58 +13,36 @@ import { useUserData } from '@/app/lib/hooks';
 import Link from 'next/link';
 import apiService from '@/app/lib/apiService';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import DeleteConfirmModal from '../modal/delete-confirm-modal';
+import { transformedContent } from '../form/form-mention-textfield';
 
 export default function PostCard({
   post,
-  detailed,
+  chained,
+  setUpdatedTarget,
 }: {
   post: Post;
-  detailed?: boolean;
+  chained?: boolean;
+  setUpdatedTarget?: Dispatch<
+    SetStateAction<Post | { reply: Reply; replyCount: number } | null>
+  >;
 }) {
   const { data } = useSession();
+  const router = useRouter();
   const [anchorEl, setAncholEl] = useState<HTMLElement | null>(null);
   const [imageSizes, setImageSizes] = useState({ width: 0, height: 0 });
-  const relationship = post.author.relationship;
+  const [openModal, setOpenModal] = useState(false);
+  const relationship = post?.author.relationship;
   const [isFollowed, setIsFollowed] = useState(
     relationship === 'followedByCurrentUser' ||
       relationship === 'followEachOther',
   );
-
-  const transformContent = (content: string) => {
-    const regex = /(#\w+)/gm;
-
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-
-    while ((match = regex.exec(content)) !== null) {
-      if (lastIndex < match.index) {
-        parts.push(content.substring(lastIndex, match.index));
-      }
-
-      parts.push(
-        <Link
-          className="hover:underline"
-          href={`/explore?q=${encodeURIComponent(match[1])}`}
-          style={{ color: 'rgb(29, 155, 240)' }}
-          key={match.index}
-        >
-          {match[1]}
-        </Link>,
-      );
-      console.log('Encoded URI', encodeURI(`/explore?q=${match[1]}`));
-
-      lastIndex = match.index + match[0].length;
-    }
-
-    if (lastIndex < content.length) {
-      parts.push(content.substring(lastIndex));
-    }
-
-    return parts;
-  };
-
-  const postDate = new Date(post.createdAt);
+  const transformedPostContent = transformedContent({
+    content: post?.content,
+    regex: /(#\w+)/gm,
+  });
+  const postDate = new Date(post?.createdAt);
   const currentDate = new Date();
   const timeDiff = Date.now() - postDate.getTime();
   const postTime =
@@ -86,9 +64,9 @@ export default function PostCard({
         });
 
   useEffect(() => {
-    if (post.mediaFile) {
+    if (post?.mediaFile) {
       const img = new Image();
-      img.src = post.mediaFile;
+      img.src = post?.mediaFile;
       img.onload = () => {
         setImageSizes({ width: img.naturalWidth, height: img.naturalHeight });
       };
@@ -108,40 +86,66 @@ export default function PostCard({
   };
 
   return (
-    <Stack sx={{ width: '100%' }}>
-      {/* {isRepost && (
-        <Box>
-          <Box>
-            <ArrowPathRoundedSquareIcon />
-          </Box>
-          <Box>{}</Box>
-        </Box>
-      )} */}
-      <Box
+    <>
+      <Stack
+        onClick={() =>
+          router.push(`/main/${data?.currentUser.username}/posts/${post?._id}`)
+        }
         sx={{
-          display: 'flex',
           width: '100%',
-          p: 1,
-          // borderTop: '1px solid rgb(239, 243, 244)',
-          borderBottom: '1px solid rgb(239, 243, 244)',
+          '&:hover': { bgcolor: 'rgba(0,0,0,0.03)', cursor: 'pointer' },
         }}
       >
-        <Stack>
-          <Avatar src={post.author.avatar} alt={post.author.username} />
-        </Stack>
-        <Stack sx={{ flexGrow: 1, pl: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Box>
-              <Typography component="span" sx={{ pr: 1 }}>
-                {post.author.displayName}
-              </Typography>
-              <Typography component="span" sx={{ color: 'grey' }}>
-                @{post.author.username}
-              </Typography>
-              {!detailed && (
+        <Box
+          sx={{
+            display: 'flex',
+            // position: 'relative',
+            width: '100%',
+            px: 2,
+            py: 1,
+            borderBottom: chained ? '' : '1px solid rgb(239, 243, 244)',
+          }}
+        >
+          <Stack sx={{ alignItems: 'center' }}>
+            <Avatar src={post?.author.avatar} alt={post?.author.username} />
+            {chained && (
+              <Box
+                sx={{
+                  position: 'relative',
+                  top: 8,
+                  width: 2,
+                  flexGrow: 1,
+                  border: '0 solid black',
+                  bgcolor: 'rgb(207, 217, 222)',
+                }}
+              ></Box>
+            )}
+          </Stack>
+          <Stack sx={{ flexGrow: 1, pl: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Box>
                 <Typography
                   component="span"
                   sx={{
+                    pr: 1,
+                    color: 'rgb(15, 20, 25)',
+                    fontWeight: 'bold',
+                    fontSize: 15,
+                  }}
+                >
+                  {post?.author.displayName}
+                </Typography>
+                <Typography
+                  component="span"
+                  sx={{ color: 'rgb(83, 100, 113)', fontSize: 15 }}
+                >
+                  @{post?.author.username}
+                </Typography>
+                <Typography
+                  component="span"
+                  sx={{
+                    color: 'rgb(83, 100, 113)',
+                    fontSize: 15,
                     '&::before': {
                       content: `"•"`,
                       mx: 1,
@@ -150,99 +154,111 @@ export default function PostCard({
                 >
                   {postTime}
                 </Typography>
-              )}
-            </Box>
-            <Box
-              sx={{ height: '25px', width: '25px', cursor: 'pointer' }}
-              onClick={(e) => setAncholEl(e.currentTarget)}
-            >
-              <EllipsisHorizontalIcon />
-            </Box>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorEl)}
-              onClose={() => setAncholEl(null)}
-            >
-              {data?.currentUser._id === post.author._id ? (
-                <Box>
-                  <MenuItem>Edit</MenuItem>
-                  <MenuItem>Delete</MenuItem>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  position: 'relative',
+                  right: 8,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    position: 'absolute',
+                    alignItems: 'center',
+                    height: '40px',
+                    width: '40px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      bgcolor: 'rgba(29,155,240,0.1)',
+                      color: 'rgb(29,155,240)',
+                      borderRadius: '50%',
+                    },
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAncholEl(e.currentTarget);
+                  }}
+                >
+                  <EllipsisHorizontalIcon width={25} height={25} />
                 </Box>
-              ) : (
-                <MenuItem onClick={() => handleToggleFollow(post.author._id)}>
-                  {isFollowed ? 'Unfollow' : 'Follow'} @{post.author.username}
-                </MenuItem>
-              )}
-            </Menu>
-          </Box>
-          <Box sx={{ py: 1 }}>{transformContent(post.content)}</Box>
-          {post.mediaFile && (
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                pb: 1,
-              }}
+              </Box>
+            </Box>
+            <Box sx={{ mb: 1 }}>{transformedPostContent}</Box>
+            {post?.mediaFile && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  // justifyContent: 'center',
+                  // alignItems: 'center',
+                  pb: 1,
+                }}
+              >
+                <NextImage
+                  src={post?.mediaFile}
+                  alt="post-image"
+                  width={imageSizes.width > 510 ? 510 : imageSizes.width}
+                  height={imageSizes.height}
+                />
+              </Box>
+            )}
+            <PostStats post={post} />
+          </Stack>
+        </Box>
+      </Stack>
+      <Menu
+        sx={{ mt: 3 }}
+        onClick={() => setAncholEl(null)}
+        id="menu-appbar"
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        keepMounted
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        open={Boolean(anchorEl)}
+        onClose={() => setAncholEl(null)}
+      >
+        {data?.currentUser._id === post?.author._id ? (
+          <Box>
+            <MenuItem
+              sx={{ fontWeight: 'bold' }}
+              onClick={() => router.push(`/compose/edit/post/${post._id}`)}
             >
-              <NextImage
-                src={post.mediaFile}
-                alt="post-image"
-                width={imageSizes.width > 510 ? 510 : imageSizes.width}
-                height={imageSizes.height}
-              />
-            </Box>
-          )}
-          {detailed && (
-            <Box>
-              <Typography>
-                {postDate.toLocaleString('en-US', {
-                  hour: 'numeric',
-                  minute: 'numeric',
-                })}
-              </Typography>
-              <Typography
-                sx={{
-                  '&::before': {
-                    content: `"•"`,
-                    mx: 1,
-                  },
-                }}
-              >
-                {postDate.toLocaleString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
-              </Typography>
-              <Typography
-                sx={{
-                  '&::before': {
-                    content: `"•"`,
-                    mx: 1,
-                  },
-                }}
-              >
-                <Typography sx={{ fontWeight: 'bold' }}>
-                  {post.viewCount}
-                </Typography>
-                Views
-              </Typography>
-            </Box>
-          )}
-          <PostStats post={post} />
-        </Stack>
-      </Box>
-    </Stack>
+              Edit
+            </MenuItem>
+            <MenuItem
+              sx={{ fontWeight: 'bold' }}
+              onClick={() => setOpenModal(true)}
+            >
+              Delete
+            </MenuItem>
+          </Box>
+        ) : (
+          <MenuItem
+            sx={{ fontWeight: 'bold' }}
+            onClick={() => handleToggleFollow(post?.author._id)}
+          >
+            {isFollowed ? 'Unfollow' : 'Follow'} @{post?.author.username}
+          </MenuItem>
+        )}
+      </Menu>
+      <DeleteConfirmModal
+        open={openModal}
+        setOpen={setOpenModal}
+        targetType="post"
+        targetId={post?._id}
+        setUpdatedTarget={chained ? undefined : setUpdatedTarget}
+        chainedOrDetailed={chained}
+      />
+    </>
   );
 }

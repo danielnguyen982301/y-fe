@@ -18,15 +18,15 @@ import { useSession } from 'next-auth/react';
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
 const links = [
-  { name: 'Home', href: '/home', icon: HomeIcon },
+  { name: 'Home', href: '/main/home', icon: HomeIcon },
   {
     name: 'Explore',
-    href: '/explore',
+    href: '/main/explore',
     icon: MagnifyingGlassCircleIcon,
   },
-  { name: 'Notifications', href: '/notifications', icon: BellAlertIcon },
-  { name: 'Messages', href: '/messages', icon: EnvelopeIcon },
-  { name: 'Bookmarks', href: '/bookmarks', icon: BookmarkIcon },
+  { name: 'Notifications', href: '/main/notifications', icon: BellAlertIcon },
+  { name: 'Messages', href: '/main/messages', icon: EnvelopeIcon },
+  { name: 'Bookmarks', href: '/main/bookmarks', icon: BookmarkIcon },
   { name: 'Profile', icon: UserIcon },
 ];
 
@@ -39,7 +39,7 @@ export default function NavLinks() {
       {links.map((link) => {
         const LinkIcon = link.icon;
         if (link.name === 'Profile')
-          link.href = `/${data?.currentUser?.username}`;
+          link.href = `/main/${data?.currentUser?.username}`;
         return (
           <Box key={link.name} sx={{ py: 1 }}>
             <Link

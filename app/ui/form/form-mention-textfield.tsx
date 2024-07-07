@@ -3,6 +3,7 @@
 import apiService from '@/app/lib/apiService';
 import { Hashtag } from '@/app/lib/definitions';
 import { Box, Typography } from '@mui/material';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Mention, MentionsInput, SuggestionDataItem } from 'react-mentions';
@@ -41,53 +42,50 @@ const defaultStyle = {
   },
 };
 
-export default function MentionTextField({
-  name,
-  inputValue,
-  ...other
-}: Record<string, any>) {
-  const { control } = useFormContext();
-  // const [hashtags, setHashtags] = useState<{ id: string; display: string }[]>(
-  //   [],
-  // );
+export const findLineBreaks = (input: string) => {
+  const regex = /\n/gm;
 
-  const findLineBreaks = (input: string) => {
-    const regex = /\n/gm;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
 
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-
-    while ((match = regex.exec(input)) !== null) {
-      if (lastIndex < match.index) {
-        parts.push(input.substring(lastIndex, match.index));
-      }
-
-      parts.push(<br key={match.index} />);
-
-      lastIndex = match.index + match[0].length;
+  while ((match = regex.exec(input)) !== null) {
+    if (lastIndex < match.index) {
+      parts.push(input.substring(lastIndex, match.index));
     }
 
-    if (lastIndex < input.length) {
-      parts.push(input.substring(lastIndex));
+    parts.push(<br key={match.index} />);
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < input.length) {
+    parts.push(input.substring(lastIndex));
+  }
+  return parts;
+};
+
+export const transformedContent = ({
+  content,
+  regex,
+  isFormInput,
+}: {
+  content: string;
+  regex: RegExp;
+  isFormInput?: boolean;
+}) => {
+  let parts: any[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(content)) !== null) {
+    if (lastIndex < match.index) {
+      const contentPart = content.substring(lastIndex, match.index);
+      parts = [...parts, ...findLineBreaks(contentPart)];
     }
-    return parts;
-  };
 
-  const transformedInputValue = (input: string) => {
-    const regex = /#\[(\w+)\]|#(\w+)/gm;
-
-    let parts: any[] = [];
-    let lastIndex = 0;
-    let match;
-
-    while ((match = regex.exec(input)) !== null) {
-      if (lastIndex < match.index) {
-        const inputPart = input.substring(lastIndex, match.index);
-        parts = [...parts, ...findLineBreaks(inputPart)];
-      }
-
-      parts.push(
+    parts.push(
+      isFormInput ? (
         <Typography
           component="span"
           sx={{
@@ -96,28 +94,46 @@ export default function MentionTextField({
             zIndex: 100,
             fontSize: 20,
             fontFamily: 'inherit',
+            letterSpacing: 'inherit',
           }}
-          key={match.index}
+          key={`${Date.now()} - ${Math.random()}`}
         >
           {match[1] ? `#${match[1]}` : `#${match[2]}`}
-        </Typography>,
-      );
+        </Typography>
+      ) : (
+        <Link
+          className="hover:underline"
+          href={`/explore?q=${encodeURIComponent(match[1])}`}
+          style={{ color: 'rgb(29, 155, 240)' }}
+          key={`${Date.now()} - ${Math.random()}`}
+        >
+          {match[1]}
+        </Link>
+      ),
+    );
 
-      lastIndex = match.index + match[0].length;
-    }
+    lastIndex = match.index + match[0].length;
+  }
 
-    if (lastIndex < input.length) {
-      const inputPart = input.substring(lastIndex);
-      parts = [...parts, ...findLineBreaks(inputPart)];
-    }
-    return parts;
-  };
+  if (lastIndex < content?.length) {
+    const contentPart = content.substring(lastIndex);
+    parts = [...parts, ...findLineBreaks(contentPart)];
+  }
+  return parts;
+};
+
+export default function MentionTextField({
+  formType,
+  name,
+  inputValue,
+  ...other
+}: Record<string, any>) {
+  const { control } = useFormContext();
 
   const fetchHashtags = async (
     query: string,
     callback: (data: SuggestionDataItem[]) => void,
   ) => {
-    console.log('Query', query);
     try {
       const response = await apiService.get('/hashtags', {
         params: { searchText: query },
@@ -130,6 +146,12 @@ export default function MentionTextField({
       console.log(error);
     }
   };
+
+  const transformedInput = transformedContent({
+    content: inputValue,
+    regex: /#\[(\w+)\]|#(\w+)/gm,
+    isFormInput: true,
+  });
 
   return (
     <Controller
@@ -149,11 +171,13 @@ export default function MentionTextField({
                 zIndex: -1,
               }}
             >
-              {transformedInputValue(inputValue)}
+              {transformedInput}
             </Box>
           )}
           <MentionsInput
-            placeholder="What is happening?!"
+            placeholder={
+              formType === 'Post' ? 'What is happening?!' : 'Post your reply'
+            }
             {...field}
             {...other}
             style={defaultStyle}

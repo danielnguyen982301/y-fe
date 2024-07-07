@@ -14,31 +14,44 @@ import {
   HeartIcon as UnlikedHeart,
 } from '@heroicons/react/24/outline';
 import { Box, Tooltip, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 export default function PostStats({
   post,
   detailed,
+  newReplyCount,
 }: {
   post: Post;
   detailed?: boolean;
+  newReplyCount?: number;
 }) {
-  const stats = {
-    likeCount: post.likeCount,
-    viewCount: post.viewCount,
-    repostCount: post.repostCount,
-    replyCount: post.replyCount,
-    bookmarkCount: post.bookmarkCount,
-  };
+  const stats = useMemo(
+    () => ({
+      likeCount: post?.likeCount,
+      viewCount: post?.viewCount,
+      repostCount: post?.repostCount,
+      replyCount: newReplyCount ?? post?.replyCount,
+      bookmarkCount: post?.bookmarkCount,
+    }),
+    [post, newReplyCount],
+  );
 
-  const states = {
-    isLiked: post.isLiked,
-    isReposted: post.isReposted,
-    isBookmarked: post.isBookmarked,
-  };
+  const states = useMemo(
+    () => ({
+      isLiked: post?.isLiked,
+      isReposted: post?.isReposted,
+      isBookmarked: post?.isBookmarked,
+    }),
+    [post],
+  );
 
   const [postStats, setPostStats] = useState(stats);
   const [postStates, setPostStates] = useState(states);
+
+  useEffect(() => {
+    setPostStats(stats);
+    setPostStates(states);
+  }, [stats, states]);
 
   const handleToggleLike = async (postId: string) => {
     try {
@@ -85,7 +98,12 @@ export default function PostStats({
             targetType: 'Post',
             targetId: postId,
           });
-      // setPostStats({ ...postStats, repostCount: response.data.repostCount });
+      if (detailed) {
+        setPostStats({
+          ...postStats,
+          bookmarkCount: response.data.bookmarkCount,
+        });
+      }
       setPostStates({ ...postStates, isBookmarked: !postStates.isBookmarked });
     } catch (error) {
       console.log(error);
@@ -93,7 +111,16 @@ export default function PostStats({
   };
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        borderTop: detailed ? '1px solid rgb(239, 243, 244)' : '',
+        borderBottom: detailed ? '1px solid rgb(239, 243, 244)' : '',
+        py: detailed ? 1 : 0,
+        my: 1,
+      }}
+    >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Box
           sx={{
@@ -102,6 +129,7 @@ export default function PostStats({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            color: 'rgb(83, 100, 113)',
             '&:hover': {
               cursor: 'pointer',
               borderRadius: 9999,
@@ -113,7 +141,9 @@ export default function PostStats({
           <ChatBubbleOvalLeftIcon height="20px" width="20px" />
         </Box>
         {!!postStats.replyCount && (
-          <Typography>{postStats.replyCount}</Typography>
+          <Typography sx={{ position: 'relative', right: 4 }}>
+            {postStats.replyCount}
+          </Typography>
         )}
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -133,7 +163,10 @@ export default function PostStats({
           }}
         >
           <Box
-            onClick={() => handleToggleRepost(post._id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleRepost(post?._id);
+            }}
             sx={{
               width: 40,
               height: 40,
@@ -185,7 +218,10 @@ export default function PostStats({
           }}
         >
           <Box
-            onClick={() => handleToggleLike(post._id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleLike(post?._id);
+            }}
             sx={{
               width: 40,
               height: 40,
@@ -267,7 +303,10 @@ export default function PostStats({
           }}
         >
           <Box
-            onClick={() => handleToggleBookmark(post._id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleBookmark(post?._id);
+            }}
             sx={{
               width: 40,
               height: 40,

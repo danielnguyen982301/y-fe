@@ -47,12 +47,13 @@ export type Reply = {
   content: string;
   mediaFile?: string;
   targetType: 'Post' | 'Reply';
-  target: Post | Reply;
+  target: Post | Reply | string;
   replyCount: number;
   repostCount: number;
   likeCount: number;
   viewCount: number;
   bookmarkCount: number;
+  links: (Post | Reply | string)[];
   createdAt: string;
   updatedAt: string;
   isLiked: boolean;
@@ -61,8 +62,10 @@ export type Reply = {
 };
 
 export type Thread = {
+  _id: string;
   user: User;
   post?: Post;
+  reply?: Reply;
   repostType?: 'Post' | 'Reply';
   repost?: Post;
   createdAt: string;
@@ -73,6 +76,20 @@ export type Hashtag = {
   _id: string;
   name: string;
   posts: string[];
+};
+
+export type Like = {
+  author: User;
+  targetType: 'Post' | 'Reply';
+  target: Post | Reply;
+  [key: string]: any;
+};
+
+export type Bookmark = {
+  user: User;
+  targetType: 'Post' | 'Reply';
+  target: Post | Reply;
+  [key: string]: any;
 };
 
 export type Customer = {
