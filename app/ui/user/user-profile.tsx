@@ -51,6 +51,7 @@ export default function UserProfile({ user }: { user: User }) {
             alt={user.username}
             width={600}
             height={200}
+            style={{ width: 600, height: 200 }}
           />
         )}
       </Box>
@@ -113,7 +114,7 @@ export default function UserProfile({ user }: { user: User }) {
         )}
         <Box sx={{ display: 'flex', my: 1 }}>
           {!!user?.location && (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1.5 }}>
               <MapPinIcon className="h-5 w-5" />
               <Typography
                 sx={{ color: 'rgb(83, 100, 113)', fontSize: '15px', ml: 1 }}
@@ -122,7 +123,7 @@ export default function UserProfile({ user }: { user: User }) {
               </Typography>
             </Box>
           )}
-          <Box sx={{ display: 'flex', alignItems: 'center', ml: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <CalendarDaysIcon className="h-5 w-5" />
             <Typography
               sx={{ color: 'rgb(83, 100, 113)', fontSize: '15px', ml: 1 }}

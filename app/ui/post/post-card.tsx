@@ -125,19 +125,38 @@ export default function PostCard({
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Box>
                 <Typography
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/main/${post?.author.username}`);
+                  }}
                   component="span"
                   sx={{
                     pr: 1,
                     color: 'rgb(15, 20, 25)',
                     fontWeight: 'bold',
                     fontSize: 15,
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                    },
                   }}
                 >
                   {post?.author.displayName}
                 </Typography>
                 <Typography
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/main/${post?.author.username}`);
+                  }}
                   component="span"
-                  sx={{ color: 'rgb(83, 100, 113)', fontSize: 15 }}
+                  sx={{
+                    color: 'rgb(83, 100, 113)',
+                    fontSize: 15,
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                    },
+                  }}
                 >
                   @{post?.author.username}
                 </Typography>

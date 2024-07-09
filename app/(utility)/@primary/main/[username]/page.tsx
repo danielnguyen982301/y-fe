@@ -78,26 +78,27 @@ export default function Page({ params }: { params: { username: string } }) {
           onChange={(e, value) => setCurrentTab(value)}
         >
           {TABS.map((tab) => {
-            if (tab.name === 'Likes') {
-              if (isCurrentUser) {
-                return (
-                  <Tab
-                    disableRipple
-                    key={tab.name}
-                    value={tab.name}
-                    label={tab.name}
-                    sx={{ width: 'calc(100% / 3)' }}
-                  />
-                );
-              } else return null;
-            }
+            // if (tab.name === 'Likes') {
+            //   if (isCurrentUser) {
+            //     return (
+            //       <Tab
+            //         disableRipple
+            //         key={tab.name}
+            //         value={tab.name}
+            //         label={tab.name}
+            //         sx={{ width: 'calc(100% / 3)' }}
+            //       />
+            //     );
+            //   } else return null;
+            // }
             return (
               <Tab
                 disableRipple
                 key={tab.name}
                 value={tab.name}
                 label={tab.name}
-                sx={{ width: isCurrentUser ? 'calc(100% /3)' : '50%' }}
+                sx={{ width: 'calc(100% /3)' }}
+                // sx={{ width: isCurrentUser ? 'calc(100% /3)' : '50%' }}
               />
             );
           })}

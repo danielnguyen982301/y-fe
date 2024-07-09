@@ -12,6 +12,7 @@ import FTextField from '../form/form-textfield';
 import { useRouter } from 'next/navigation';
 import apiService from '@/app/lib/apiService';
 import { isEqual } from 'lodash';
+import { cloudinaryUpload } from '@/app/lib/utils';
 
 const yupSchema = Yup.object().shape({
   displayName: Yup.string().required('Display Name is required'),
@@ -97,10 +98,30 @@ export default function UserProfileUpdateForm() {
     ),
   });
 
-  const onSubmit = async (formData: ProfileUpdateData) => {
+  const onSubmit = async ({
+    avatar,
+    header,
+    ...updateDetails
+  }: ProfileUpdateData) => {
+    let avatarData, headerData;
+    if (avatar && typeof avatar === 'object') {
+      avatarData = await cloudinaryUpload(avatar as File);
+    }
+    if (header && typeof header === 'object') {
+      headerData = await cloudinaryUpload(header as File);
+    }
     try {
-      await apiService.put(`/users/${data?.currentUser._id}`, formData);
-      await update({ currentUser: { ...data?.currentUser, ...formData } });
+      await apiService.put(`/users/${data?.currentUser._id}`, {
+        ...updateDetails,
+        avatar: avatarData,
+        header: headerData,
+      });
+      await update({
+        currentUser: {
+          ...data?.currentUser,
+          ...{ ...updateDetails, avatar: avatarData, header: headerData },
+        },
+      });
       router.back();
     } catch (error) {
       console.log(error);

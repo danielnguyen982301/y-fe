@@ -40,7 +40,8 @@ export default function ReplyCard({
     relationship === 'followedByCurrentUser' ||
       relationship === 'followEachOther',
   );
-
+  const targetAuthorUsername = (reply?.target as Post | Reply)?.author
+    ?.username;
   const transformedReplyContent = transformedContent({
     content: reply?.content,
     regex: /(#\w+)/gm,
@@ -131,19 +132,38 @@ export default function ReplyCard({
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Box>
                 <Typography
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/main/${reply.author.username}`);
+                  }}
                   component="span"
                   sx={{
                     pr: 1,
                     color: 'rgb(15, 20, 25)',
                     fontWeight: 'bold',
                     fontSize: 15,
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                    },
                   }}
                 >
                   {reply.author.displayName}
                 </Typography>
                 <Typography
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/main/${reply.author.username}`);
+                  }}
                   component="span"
-                  sx={{ color: 'rgb(83, 100, 113)', fontSize: 15 }}
+                  sx={{
+                    color: 'rgb(83, 100, 113)',
+                    fontSize: 15,
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                    },
+                  }}
                 >
                   @{reply.author.username}
                 </Typography>
@@ -198,8 +218,23 @@ export default function ReplyCard({
             {!direct && (
               <Box>
                 <Typography sx={{ color: 'rgb(83, 100, 113)', fontSize: 15 }}>
-                  Replying to @
-                  {(reply?.target as Post | Reply)?.author?.username}
+                  Replying to{' '}
+                  <Typography
+                    sx={{
+                      color: 'rgb(29,155,240)',
+                      '&:hover': {
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                      },
+                    }}
+                    component="span"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/main/${targetAuthorUsername}`);
+                    }}
+                  >
+                    @{targetAuthorUsername}
+                  </Typography>
                 </Typography>
               </Box>
             )}
