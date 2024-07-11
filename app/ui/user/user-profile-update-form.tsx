@@ -119,7 +119,11 @@ export default function UserProfileUpdateForm() {
       await update({
         currentUser: {
           ...data?.currentUser,
-          ...{ ...updateDetails, avatar: avatarData, header: headerData },
+          ...{
+            ...updateDetails,
+            avatar: avatarData ?? avatar,
+            header: headerData ?? header,
+          },
         },
       });
       router.back();

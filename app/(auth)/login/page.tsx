@@ -20,6 +20,7 @@ import FormProvider from '@/app/ui/form/form-provider';
 import FTextField from '@/app/ui/form/form-textfield';
 import FCheckbox from '@/app/ui/form/form-checkbox';
 import { authenticate } from '@/app/lib/actions';
+import socket from '@/app/lib/socket';
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email').required('Email is required'),
@@ -57,6 +58,8 @@ export default function Page() {
 
     try {
       await authenticate({ email, password });
+      // socket.auth = { username: user.username };
+      // socket.connect();
     } catch (error) {
       reset();
       setError('root.responseError', {

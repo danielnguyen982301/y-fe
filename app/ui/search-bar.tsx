@@ -3,23 +3,42 @@
 import { XCircleIcon } from '@heroicons/react/20/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Box, Menu, MenuItem, TextField, Typography } from '@mui/material';
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { Hashtag, User } from '../lib/definitions';
+import {
+  ChangeEvent,
+  Dispatch,
+  FormEvent,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
+import { ChatUser, Hashtag, User } from '../lib/definitions';
 import apiService from '../lib/apiService';
 import TagSuggestionCard from './suggestions/tag-suggestion-card';
 import UserSuggestionCard from './suggestions/user-suggestion-card';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default function SearchBar({ query }: { query: string }) {
+export default function SearchBar({
+  query,
+  chatUserSearch,
+  chatUsers,
+  setChatUsers,
+  setSelectedChatUser,
+}: {
+  query?: string;
+  chatUserSearch?: boolean;
+  chatUsers?: ChatUser[];
+  setChatUsers?: Dispatch<SetStateAction<ChatUser[]>>;
+  setSelectedChatUser?: Dispatch<SetStateAction<ChatUser | null>>;
+}) {
   const [anchorEl, setAncholEl] = useState<HTMLElement | null>(null);
   const [tagSuggestions, setTagSuggestions] = useState<Hashtag[]>([]);
   const [userSuggestions, setUserSuggestions] = useState<User[]>([]);
-  const [searchText, setSearchText] = useState(query);
+  const [searchText, setSearchText] = useState(query ?? '');
   const router = useRouter();
   const noResultFound =
-    (!tagSuggestions.length && searchText.includes('#')) ||
-    (!userSuggestions.length && searchText.includes('@'));
+    (!tagSuggestions.length && searchText?.includes('#')) ||
+    (!userSuggestions.length && searchText?.includes('@'));
 
   const handleSearchChange = async (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -43,7 +62,7 @@ export default function SearchBar({ query }: { query: string }) {
     }
     const lastQuery = queries.pop();
     try {
-      if (lastQuery?.startsWith('#')) {
+      if (lastQuery?.startsWith('#') && !chatUserSearch) {
         setUserSuggestions([]);
         const tagResponse = await apiService.get('/hashtags', {
           params: { searchText: lastQuery.slice(1) },
@@ -66,13 +85,39 @@ export default function SearchBar({ query }: { query: string }) {
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAncholEl(null);
-    const transformedSearch = searchText.replace(/#|@/g, '');
+    const transformedSearch = searchText?.replace(/#|@/g, '');
     if (!transformedSearch) return;
-    router.push(`/explore?q=${transformedSearch}`);
+    router.push(`/main/explore?q=${transformedSearch}`);
+  };
+
+  const redirectToUserProfile = (username: string) => {
+    router.push(`/main/${username}`);
+  };
+
+  const handleSelectChatUser = (user: User) => {
+    if (setSelectedChatUser && setChatUsers && chatUsers) {
+      const existingChatUser = chatUsers.find(
+        ({ userId }) => userId === user._id,
+      );
+      if (existingChatUser) {
+        setSelectedChatUser(existingChatUser);
+      } else {
+        const chatUser: ChatUser = {
+          userId: user._id,
+          username: user.username,
+          hasNewMessages: false,
+          messages: [],
+        };
+        setChatUsers([chatUser, ...chatUsers]);
+        setSelectedChatUser(chatUser);
+      }
+    }
   };
 
   useEffect(() => {
-    setSearchText(query);
+    if (query) {
+      setSearchText(query);
+    }
   }, [query]);
 
   return (
@@ -130,7 +175,7 @@ export default function SearchBar({ query }: { query: string }) {
                 key={tag._id}
                 onClick={() => {
                   router.push(
-                    `/explore?q=${encodeURIComponent(`#${tag.name}`)}`,
+                    `/main/explore?q=${encodeURIComponent(`#${tag.name}`)}`,
                   );
                   setAncholEl(null);
                 }}
@@ -142,7 +187,15 @@ export default function SearchBar({ query }: { query: string }) {
             ))}
           {!!userSuggestions.length &&
             userSuggestions.map((user) => (
-              <MenuItem sx={{ width: '100%' }} key={user._id}>
+              <MenuItem
+                sx={{ width: '100%' }}
+                key={user._id}
+                onClick={() =>
+                  chatUserSearch
+                    ? handleSelectChatUser(user)
+                    : redirectToUserProfile(user.username)
+                }
+              >
                 <UserSuggestionCard user={user} />
               </MenuItem>
             ))}

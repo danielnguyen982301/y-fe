@@ -11,6 +11,7 @@ import AccountMenu from './account-menu';
 import { useUserData } from '@/app/lib/hooks';
 import { useSession } from 'next-auth/react';
 import { User } from '@/app/lib/definitions';
+import socket from '@/app/lib/socket';
 
 export default function MainHeader() {
   const { data } = useSession();
@@ -57,6 +58,42 @@ export default function MainHeader() {
       </MenuItem>
     </Menu>
   );
+
+  React.useEffect(() => {
+    const sessionId = localStorage.getItem('sessionId');
+
+    if (sessionId) {
+      socket.auth = { sessionId };
+      socket.connect();
+    } else {
+      socket.auth = {
+        username: data?.currentUser.username,
+        userId: data?.currentUser._id,
+      };
+      socket.connect();
+    }
+
+    socket.on(
+      'session',
+      ({ sessionId, userId }: { sessionId: string; userId: string }) => {
+        // attach the session ID to the next reconnection attempts
+        socket.auth = { sessionId };
+        // store it in the localStorage
+        localStorage.setItem('sessionId', sessionId);
+        // save the ID of the user
+        socket.userId = userId;
+      },
+    );
+
+    // socket.on("connect_error", (err) => {
+    //   if (err.message === "invalid user") {
+
+    //   }
+    // });
+    return () => {
+      socket.off('connect_error');
+    };
+  }, [data]);
 
   return (
     <Stack

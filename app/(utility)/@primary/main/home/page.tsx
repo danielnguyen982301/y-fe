@@ -2,13 +2,14 @@
 
 import { Post, Thread } from '@/app/lib/definitions';
 import { useUserData } from '@/app/lib/hooks';
+import socket from '@/app/lib/socket';
 import PostFormModal from '@/app/ui/modal/post-form-modal';
 import PostForm from '@/app/ui/post/post-form';
 import PostList from '@/app/ui/post/post-list';
 import SearchBar from '@/app/ui/search-bar';
 import { Box, Container, Stack, Tab, Tabs } from '@mui/material';
 import { useSession } from 'next-auth/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Page() {
   const { data } = useSession();
