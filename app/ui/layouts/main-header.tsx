@@ -60,30 +60,33 @@ export default function MainHeader() {
   );
 
   React.useEffect(() => {
-    const sessionId = localStorage.getItem('sessionId');
+    if (!data) return;
+    // const sessionId = localStorage.getItem('sessionId');
 
-    if (sessionId) {
-      socket.auth = { sessionId };
-      socket.connect();
-    } else {
-      socket.auth = {
-        username: data?.currentUser.username,
-        userId: data?.currentUser._id,
-      };
-      socket.connect();
-    }
+    // if (sessionId) {
+    //   socket.auth = { sessionId };
+    //   socket.connect();
+    // } else {
+    //   socket.auth = {
+    //     username: data?.currentUser.username,
+    //     userId: data?.currentUser._id,
+    //   };
+    //   socket.connect();
+    // }
+    socket.auth = { userId: data?.currentUser._id };
+    socket.connect();
 
-    socket.on(
-      'session',
-      ({ sessionId, userId }: { sessionId: string; userId: string }) => {
-        // attach the session ID to the next reconnection attempts
-        socket.auth = { sessionId };
-        // store it in the localStorage
-        localStorage.setItem('sessionId', sessionId);
-        // save the ID of the user
-        socket.userId = userId;
-      },
-    );
+    // socket.on(
+    //   'session',
+    //   ({ sessionId, userId }: { sessionId: string; userId: string }) => {
+    //     // attach the session ID to the next reconnection attempts
+    //     socket.auth = { sessionId };
+    //     // store it in the localStorage
+    //     localStorage.setItem('sessionId', sessionId);
+    //     // save the ID of the user
+    //     socket.userId = userId;
+    //   },
+    // );
 
     // socket.on("connect_error", (err) => {
     //   if (err.message === "invalid user") {

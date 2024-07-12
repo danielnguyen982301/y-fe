@@ -21,15 +21,11 @@ import Link from 'next/link';
 export default function SearchBar({
   query,
   chatUserSearch,
-  chatUsers,
-  setChatUsers,
-  setSelectedChatUser,
+  handleSelectChatUser,
 }: {
   query?: string;
   chatUserSearch?: boolean;
-  chatUsers?: ChatUser[];
-  setChatUsers?: Dispatch<SetStateAction<ChatUser[]>>;
-  setSelectedChatUser?: Dispatch<SetStateAction<ChatUser | null>>;
+  handleSelectChatUser?: (user: User) => void;
 }) {
   const [anchorEl, setAncholEl] = useState<HTMLElement | null>(null);
   const [tagSuggestions, setTagSuggestions] = useState<Hashtag[]>([]);
@@ -54,7 +50,7 @@ export default function SearchBar({
       if (userSearch) queries.push(userSearch);
     }
 
-    if (!queries.length) {
+    if (!queries.length && !chatUserSearch) {
       setTagSuggestions([]);
       setUserSuggestions([]);
       setAncholEl(null);
@@ -62,7 +58,8 @@ export default function SearchBar({
     }
     const lastQuery = queries.pop();
     try {
-      if (lastQuery?.startsWith('#') && !chatUserSearch) {
+      if (lastQuery?.startsWith('#')) {
+        if (chatUserSearch) return;
         setUserSuggestions([]);
         const tagResponse = await apiService.get('/hashtags', {
           params: { searchText: lastQuery.slice(1) },
@@ -72,7 +69,7 @@ export default function SearchBar({
       } else {
         setTagSuggestions([]);
         const userResponse = await apiService.get('/users', {
-          params: { searchText: lastQuery?.slice(1) },
+          params: { searchText: lastQuery?.slice(1) || searchContent },
         });
         setUserSuggestions(userResponse.data.users);
         setAncholEl(event.target);
@@ -83,6 +80,7 @@ export default function SearchBar({
   };
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    if (chatUserSearch) return;
     event.preventDefault();
     setAncholEl(null);
     const transformedSearch = searchText?.replace(/#|@/g, '');
@@ -94,25 +92,23 @@ export default function SearchBar({
     router.push(`/main/${username}`);
   };
 
-  const handleSelectChatUser = (user: User) => {
-    if (setSelectedChatUser && setChatUsers && chatUsers) {
-      const existingChatUser = chatUsers.find(
-        ({ userId }) => userId === user._id,
-      );
-      if (existingChatUser) {
-        setSelectedChatUser(existingChatUser);
-      } else {
-        const chatUser: ChatUser = {
-          userId: user._id,
-          username: user.username,
-          hasNewMessages: false,
-          messages: [],
-        };
-        setChatUsers([chatUser, ...chatUsers]);
-        setSelectedChatUser(chatUser);
-      }
-    }
-  };
+  // const handleSelectChatUser = (user: User) => {
+  //   if (setSelectedChatUser && setChatUsers && chatUsers) {
+  //     const existingChatUser = chatUsers.find(
+  //       ({ userId }) => userId === user._id,
+  //     );
+  //     if (existingChatUser) {
+  //       setSelectedChatUser(existingChatUser);
+  //     } else {
+  //       const chatUser: ChatUser = {
+  //         ...user,
+  //         messages: [],
+  //       };
+  //       setChatUsers([chatUser, ...chatUsers]);
+  //       setSelectedChatUser(chatUser);
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
     if (query) {
@@ -123,6 +119,7 @@ export default function SearchBar({
   return (
     <form style={{ width: '350px' }} onSubmit={handleSearchSubmit}>
       <TextField
+        autoComplete="off"
         value={searchText}
         placeholder="Search"
         onChange={handleSearchChange}
@@ -190,11 +187,13 @@ export default function SearchBar({
               <MenuItem
                 sx={{ width: '100%' }}
                 key={user._id}
-                onClick={() =>
-                  chatUserSearch
-                    ? handleSelectChatUser(user)
-                    : redirectToUserProfile(user.username)
-                }
+                onClick={() => {
+                  if (chatUserSearch && handleSelectChatUser) {
+                    handleSelectChatUser(user);
+                    setSearchText('');
+                  } else redirectToUserProfile(user.username);
+                  setAncholEl(null);
+                }}
               >
                 <UserSuggestionCard user={user} />
               </MenuItem>

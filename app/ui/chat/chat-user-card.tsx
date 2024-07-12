@@ -12,25 +12,33 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ChatUser } from '@/app/lib/definitions';
 import { Avatar, Box, Menu, MenuItem, Stack, Typography } from '@mui/material';
+import { transformedDateAndTime } from '@/app/lib/utils';
 
 export default function ChatUserCard({
-  chatUser,
-  setSelectedChatUser,
+  user,
+  handleSelectChatUser,
+  isSelected,
 }: {
-  chatUser: ChatUser;
-  setSelectedChatUser: Dispatch<SetStateAction<ChatUser | null>>;
+  user: ChatUser;
+  handleSelectChatUser: (user: ChatUser) => void;
+  isSelected: boolean;
 }) {
   const { data } = useSession();
   const router = useRouter();
   const [anchorEl, setAncholEl] = useState<HTMLElement | null>(null);
   const [openModal, setOpenModal] = useState(false);
+  const unreadMessagesNumber = user.messages.filter(
+    ({ isRead }) => !isRead,
+  ).length;
 
   return (
     <>
       <Stack
-        onClick={() => setSelectedChatUser(chatUser)}
+        onClick={() => handleSelectChatUser(user)}
         sx={{
           width: '100%',
+          bgcolor: isSelected ? 'rgba(235,235,235,0.9)' : '',
+          borderRight: isSelected ? '2px solid rgb(29, 155, 240)' : '',
           '&:hover': { bgcolor: 'rgba(0,0,0,0.03)', cursor: 'pointer' },
         }}
       >
@@ -44,7 +52,7 @@ export default function ChatUserCard({
           }}
         >
           <Stack sx={{ alignItems: 'center' }}>
-            <Avatar src={''} alt={''} />
+            <Avatar src={user.avatar} alt={'user-avatar'} />
           </Stack>
           <Stack sx={{ flexGrow: 1, pl: 1 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -62,7 +70,7 @@ export default function ChatUserCard({
                     },
                   }}
                 >
-                  user {chatUser.userId}
+                  {user.displayName}
                 </Typography>
                 <Typography
                   component="span"
@@ -75,21 +83,25 @@ export default function ChatUserCard({
                     },
                   }}
                 >
-                  @{chatUser.username}
+                  @{user.username}
                 </Typography>
-                {/* <Typography
-                  component="span"
-                  sx={{
-                    color: 'rgb(83, 100, 113)',
-                    fontSize: 15,
-                    '&::before': {
-                      content: `"•"`,
-                      mx: 1,
-                    },
-                  }}
-                >
-                  {postTime}
-                </Typography> */}
+                {!!user.messages.length && (
+                  <Typography
+                    component="span"
+                    sx={{
+                      color: 'rgb(83, 100, 113)',
+                      fontSize: 15,
+                      '&::before': {
+                        content: `"•"`,
+                        mx: 1,
+                      },
+                    }}
+                  >
+                    {transformedDateAndTime(
+                      user.messages.slice(-1)[0].createdAt,
+                    )}
+                  </Typography>
+                )}
               </Box>
               <Box
                 sx={{
@@ -124,6 +136,23 @@ export default function ChatUserCard({
                 </Box>
               </Box>
             </Box>
+            {!!user.messages.length && (
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Box>{user.messages.slice(-1)[0].content}</Box>
+                {!!unreadMessagesNumber && (
+                  <Box
+                    sx={{
+                      bgcolor: 'red',
+                      color: 'white',
+                      px: 0.5,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {unreadMessagesNumber}
+                  </Box>
+                )}
+              </Box>
+            )}
           </Stack>
         </Box>
       </Stack>

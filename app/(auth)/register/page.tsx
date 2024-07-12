@@ -21,6 +21,7 @@ import FormProvider from '@/app/ui/form/form-provider';
 import FTextField from '@/app/ui/form/form-textfield';
 import Link from 'next/link';
 import { authenticate } from '@/app/lib/actions';
+import socket from '@/app/lib/socket';
 
 const RegisterSchema = Yup.object().shape({
   username: Yup.string().required('Username is required'),
@@ -74,6 +75,7 @@ export default function Page() {
         password,
       });
       await authenticate({ email, password });
+      // socket.connect();
     } catch (error) {
       console.log(error);
       reset();

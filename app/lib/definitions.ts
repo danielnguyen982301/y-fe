@@ -93,15 +93,15 @@ export type Bookmark = {
 };
 
 export type Message = {
+  _id: string;
   content: string;
-  // from: string;
-  // to: string;
-  fromSelf: boolean;
+  from: string;
+  to: string;
+  isRead: boolean;
+  createdAt: string;
+  [key: string]: any;
 };
 
-export type ChatUser = {
-  userId: string;
-  username: string;
-  hasNewMessages: boolean;
+export type ChatUser = User & {
   messages: Message[];
 };

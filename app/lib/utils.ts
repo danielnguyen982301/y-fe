@@ -51,6 +51,30 @@ export const formatDateToLocal = (
   return formatter.format(date);
 };
 
+export const transformedDateAndTime = (dateString: string) => {
+  const date = new Date(dateString);
+  const currentDate = new Date();
+  const timeDiff = Date.now() - date.getTime();
+  const transformedTime =
+    timeDiff < 1000 * 60
+      ? `${Math.floor(timeDiff / 1000)}s`
+      : timeDiff < 1000 * 60 * 60
+      ? `${Math.floor(timeDiff / (1000 * 60))}m`
+      : timeDiff < 1000 * 60 * 60 * 24
+      ? `${Math.floor(timeDiff / (1000 * 60 * 60))}h`
+      : currentDate.getFullYear() === date.getFullYear()
+      ? date.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        })
+      : date.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
+  return transformedTime;
+};
+
 // export const generateYAxis = (revenue: Revenue[]) => {
 //   // Calculate what labels we need to display on the y-axis
 //   // based on highest record and in 1000s
