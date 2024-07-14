@@ -1,8 +1,8 @@
 'use client';
 
 import apiService from '@/app/lib/apiService';
-import { Hashtag } from '@/app/lib/definitions';
-import { Box, Typography } from '@mui/material';
+import { Hashtag, User } from '@/app/lib/definitions';
+import { Box, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
@@ -28,15 +28,17 @@ const defaultStyle = {
   },
   suggestions: {
     list: {
+      width: '300px',
       backgroundColor: 'white',
       border: '1px solid rgba(0,0,0,0.15)',
-      fontSize: 14,
+      fontSize: 15,
     },
     item: {
+      // fontWeight: 'bold',
       padding: '5px 15px',
-      borderBottom: '1px solid rgba(0,0,0,0.15)',
+      // borderBottom: '1px solid rgba(0,0,0,0.15)',
       '&focused': {
-        backgroundColor: '#cee4e5',
+        backgroundColor: 'rgba(0,0,0,0.03)',
       },
     },
   },
@@ -65,15 +67,71 @@ export const findLineBreaks = (input: string) => {
   return parts;
 };
 
-export const transformedContent = ({
-  content,
-  regex,
-  isFormInput,
-}: {
-  content: string;
-  regex: RegExp;
-  isFormInput?: boolean;
-}) => {
+// export const transformedContent = ({
+//   content,
+//   regex,
+//   isFormInput,
+// }: {
+//   content: string;
+//   regex: RegExp;
+//   isFormInput?: boolean;
+// }) => {
+//   let parts: any[] = [];
+//   let lastIndex = 0;
+//   let match;
+
+//   while ((match = regex.exec(content)) !== null) {
+//     if (lastIndex < match.index) {
+//       const contentPart = content.substring(lastIndex, match.index);
+//       parts = [...parts, ...findLineBreaks(contentPart)];
+//     }
+//     if (isFormInput) console.log(match);
+//     parts.push(
+//       isFormInput ? (
+//         <Typography
+//           component="span"
+//           sx={{
+//             color: 'rgb(29, 155, 240)',
+//             position: 'relative',
+//             zIndex: 100,
+//             fontSize: 20,
+//             fontFamily: 'inherit',
+//             letterSpacing: 'inherit',
+//           }}
+//           key={`${Date.now()} - ${Math.random()}`}
+//         >
+//           {match[1] || match[2]
+//             ? match[1]
+//               ? `#${match[1]}`
+//               : `#${match[2]}`
+//             : `@${match[4].split('-')[1]}`}
+//         </Typography>
+//       ) : (
+//         <Link
+//           onClick={(e) => e.stopPropagation()}
+//           prefetch={false}
+//           className="hover:underline"
+//           href={`/explore?q=${encodeURIComponent(match[1])}`}
+//           style={{ color: 'rgb(29, 155, 240)' }}
+//           key={`${Date.now()} - ${Math.random()}`}
+//         >
+//           {match[1]}
+//         </Link>
+//       ),
+//     );
+
+//     lastIndex = match.index + match[0].length;
+//   }
+
+//   if (lastIndex < content?.length) {
+//     const contentPart = content.substring(lastIndex);
+//     parts = [...parts, ...findLineBreaks(contentPart)];
+//   }
+//   return parts;
+// };
+
+export const transformedFormInput = (content: string) => {
+  const regex = /#\[(\w+)\]|#(\w+)|@\((\w+)\)\[([\s\w\-]+)\]/gm;
   let parts: any[] = [];
   let lastIndex = 0;
   let match;
@@ -85,29 +143,70 @@ export const transformedContent = ({
     }
 
     parts.push(
-      isFormInput ? (
-        <Typography
-          component="span"
-          sx={{
-            color: 'rgb(29, 155, 240)',
-            position: 'relative',
-            zIndex: 100,
-            fontSize: 20,
-            fontFamily: 'inherit',
-            letterSpacing: 'inherit',
-          }}
-          key={`${Date.now()} - ${Math.random()}`}
-        >
-          {match[1] ? `#${match[1]}` : `#${match[2]}`}
-        </Typography>
-      ) : (
+      <Typography
+        component="span"
+        sx={{
+          color: 'rgb(29, 155, 240)',
+          position: 'relative',
+          zIndex: 100,
+          fontSize: 20,
+          fontFamily: 'inherit',
+          letterSpacing: 'inherit',
+        }}
+        key={`${Date.now()} - ${Math.random()}`}
+      >
+        {match[1] || match[2]
+          ? match[1]
+            ? `#${match[1]}`
+            : `#${match[2]}`
+          : `@${match[4].split('-')[1]}`}
+      </Typography>,
+    );
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < content?.length) {
+    const contentPart = content.substring(lastIndex);
+    parts = [...parts, ...findLineBreaks(contentPart)];
+  }
+  return parts;
+};
+
+export const transformedContent = (content: string) => {
+  const regex = /(#\w+)|@(\w+)/gm;
+  let parts: any[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(content)) !== null) {
+    if (lastIndex < match.index) {
+      const contentPart = content.substring(lastIndex, match.index);
+      parts = [...parts, ...findLineBreaks(contentPart)];
+    }
+
+    parts.push(
+      match[1] ? (
         <Link
+          onClick={(e) => e.stopPropagation()}
+          prefetch={false}
           className="hover:underline"
-          href={`/explore?q=${encodeURIComponent(match[1])}`}
+          href={`/main/explore?q=${encodeURIComponent(match[1])}`}
           style={{ color: 'rgb(29, 155, 240)' }}
           key={`${Date.now()} - ${Math.random()}`}
         >
           {match[1]}
+        </Link>
+      ) : (
+        <Link
+          onClick={(e) => e.stopPropagation()}
+          prefetch={false}
+          className="hover:underline"
+          href={`/main/${match[2]}`}
+          style={{ color: 'rgb(29, 155, 240)' }}
+          key={`${Date.now()} - ${Math.random()}`}
+        >
+          @{match[2]}
         </Link>
       ),
     );
@@ -147,11 +246,25 @@ export default function MentionTextField({
     }
   };
 
-  const transformedInput = transformedContent({
-    content: inputValue,
-    regex: /#\[(\w+)\]|#(\w+)/gm,
-    isFormInput: true,
-  });
+  const fetchUsers = async (
+    query: string,
+    callback: (data: SuggestionDataItem[]) => void,
+  ) => {
+    try {
+      const response = await apiService.get('/users', {
+        params: { searchText: query },
+      });
+      const transformedData = response.data.users.map((user: User) => ({
+        id: user._id,
+        display: `${user.displayName}-${user.username}`,
+      }));
+      callback(transformedData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const transformedInput = transformedFormInput(inputValue);
 
   return (
     <Controller
@@ -191,9 +304,32 @@ export default function MentionTextField({
               data={fetchHashtags}
               displayTransform={(id, display) => `#${display}`}
               renderSuggestion={(suggestion) => (
-                <Box>#{suggestion.display}</Box>
+                <Box sx={{ py: 2 }}>#{suggestion.display}</Box>
               )}
               markup="#[__display__]"
+              // regex={/#(\w+)/}
+            />
+            <Mention
+              style={{
+                // color: 'rgb(137 197 237)',
+                color: 'transparent',
+              }}
+              trigger="@"
+              data={fetchUsers}
+              displayTransform={(id, display) => `@${display.split('-')[1]}`}
+              renderSuggestion={(suggestion) => (
+                <Stack sx={{ py: 2 }}>
+                  {suggestion.display?.split('-').map((field, idx) => (
+                    <Box
+                      sx={{ fontWeight: idx ? '' : 'bold' }}
+                      key={`${suggestion.id}-${field}`}
+                    >
+                      {idx ? `@${field}` : `${field}`}
+                    </Box>
+                  ))}
+                </Stack>
+              )}
+              markup="@(__id__)[__display__]"
               // regex={/#(\w+)/}
             />
           </MentionsInput>

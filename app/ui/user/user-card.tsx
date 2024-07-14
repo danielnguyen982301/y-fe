@@ -2,7 +2,6 @@
 
 import apiService from '@/app/lib/apiService';
 import { Follow, User } from '@/app/lib/definitions';
-import { useUserData } from '@/app/lib/hooks';
 import { Avatar, Box, Button, Stack, Typography } from '@mui/material';
 import { useSession } from 'next-auth/react';
 import React, { Dispatch, SetStateAction, useState } from 'react';

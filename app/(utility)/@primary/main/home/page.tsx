@@ -1,9 +1,6 @@
 'use client';
 
 import { Post, Thread } from '@/app/lib/definitions';
-import { useUserData } from '@/app/lib/hooks';
-import socket from '@/app/lib/socket';
-import PostFormModal from '@/app/ui/modal/post-form-modal';
 import PostForm from '@/app/ui/post/post-form';
 import PostList from '@/app/ui/post/post-list';
 import SearchBar from '@/app/ui/search-bar';

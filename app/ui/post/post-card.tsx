@@ -9,13 +9,13 @@ import {
   ArrowPathRoundedSquareIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
-import { useUserData } from '@/app/lib/hooks';
 import Link from 'next/link';
 import apiService from '@/app/lib/apiService';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import DeleteConfirmModal from '../modal/delete-confirm-modal';
 import { transformedContent } from '../form/form-mention-textfield';
+import { transformedDateAndTime } from '@/app/lib/utils';
 
 export default function PostCard({
   post,
@@ -38,30 +38,7 @@ export default function PostCard({
     relationship === 'followedByCurrentUser' ||
       relationship === 'followEachOther',
   );
-  const transformedPostContent = transformedContent({
-    content: post?.content,
-    regex: /(#\w+)/gm,
-  });
-  const postDate = new Date(post?.createdAt);
-  const currentDate = new Date();
-  const timeDiff = Date.now() - postDate.getTime();
-  const postTime =
-    timeDiff < 1000 * 60
-      ? `${Math.floor(timeDiff / 1000)}s`
-      : timeDiff < 1000 * 60 * 60
-      ? `${Math.floor(timeDiff / (1000 * 60))}m`
-      : timeDiff < 1000 * 60 * 60 * 24
-      ? `${Math.floor(timeDiff / (1000 * 60 * 60))}h`
-      : currentDate.getFullYear() === postDate.getFullYear()
-      ? postDate.toLocaleString('en-US', {
-          month: 'short',
-          day: 'numeric',
-        })
-      : postDate.toLocaleString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        });
+  const transformedPostContent = transformedContent(post?.content);
 
   useEffect(() => {
     if (post?.mediaFile) {
@@ -89,7 +66,7 @@ export default function PostCard({
     <>
       <Stack
         onClick={() =>
-          router.push(`/main/${data?.currentUser.username}/posts/${post?._id}`)
+          router.push(`/main/${post?.author.username}/posts/${post?._id}`)
         }
         sx={{
           width: '100%',
@@ -171,7 +148,7 @@ export default function PostCard({
                     },
                   }}
                 >
-                  {postTime}
+                  {transformedDateAndTime(post?.createdAt)}
                 </Typography>
               </Box>
               <Box

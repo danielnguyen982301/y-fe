@@ -2,6 +2,7 @@
 
 import apiService from '@/app/lib/apiService';
 import { ChatUser, Message, User } from '@/app/lib/definitions';
+import { useChat } from '@/app/lib/hooks';
 import socket from '@/app/lib/socket';
 import ChatPanel from '@/app/ui/chat/chat-panel';
 import ChatUserCard from '@/app/ui/chat/chat-user-card';
@@ -12,13 +13,15 @@ import React, { useEffect, useState } from 'react';
 
 export default function Page() {
   const { data } = useSession();
-  const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
-  const [selectedChatUser, setSelectedChatUser] = useState<ChatUser | null>(
-    null,
-  );
-  const newMessages = chatUsers.filter((user) =>
-    user.messages.some(({ isRead }) => !isRead),
-  ).length;
+  // const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
+  // const [selectedChatUser, setSelectedChatUser] = useState<ChatUser | null>(
+  //   null,
+  // );
+  // const newMessages = chatUsers.filter((user) =>
+  //   user.messages.some(({ isRead }) => !isRead),
+  // ).length;
+  const { chatUsers, setChatUsers, selectedChatUser, setSelectedChatUser } =
+    useChat();
 
   const handleSendMessage = async (content: string) => {
     try {
@@ -26,6 +29,11 @@ export default function Page() {
         content,
         to: selectedChatUser?._id,
       });
+      if (selectedChatUser?._id === data?.currentUser._id) {
+        await apiService.put(`/messages/status`, {
+          messages: [response.data._id],
+        });
+      }
       socket.emit('privateMessage', response.data);
       setSelectedChatUser(
         selectedChatUser
@@ -75,9 +83,11 @@ export default function Page() {
         }),
       );
       const unreadMessages = existingChatUser.messages
-        .filter(({ isRead }) => !isRead)
+        .filter(({ isRead, from }) => !isRead && from !== data?.currentUser._id)
         .map((mes) => mes._id);
-      await apiService.put('/messages/status', { messages: unreadMessages });
+      if (unreadMessages.length) {
+        await apiService.put('/messages/status', { messages: unreadMessages });
+      }
     } else {
       const chatUser: ChatUser = {
         ...selectedUser,
@@ -102,77 +112,18 @@ export default function Page() {
       }),
     );
     const unreadMessages = selectedUser.messages
-      .filter(({ isRead }) => !isRead)
+      .filter(({ isRead, from }) => !isRead && from !== data?.currentUser._id)
       .map((mes) => mes._id);
-    await apiService.put('/messages/status', { messages: unreadMessages });
+    if (unreadMessages.length) {
+      await apiService.put('/messages/status', { messages: unreadMessages });
+    }
   };
 
   useEffect(() => {
-    const getChatUsers = async () => {
-      try {
-        const response = await apiService.get('/messages/users');
-        setChatUsers(response.data.chatUsers);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getChatUsers();
-  }, []);
-
-  useEffect(() => {
-    socket.on('privateMessage', async (message: Message) => {
-      if (
-        selectedChatUser?._id === message.from ||
-        selectedChatUser?._id === message.to
-      ) {
-        await apiService.put('/messages/status', { messages: [message._id] });
-      }
-      if (
-        message.to === data?.currentUser._id &&
-        !chatUsers.some((user) => user._id === message.from)
-      ) {
-        const response = await apiService.get(
-          `/messages/users/${message.from}`,
-        );
-        setChatUsers([response.data, ...chatUsers]);
-      } else {
-        setChatUsers((prevState) =>
-          prevState.map((user) => {
-            const fromSelf = data?.currentUser._id === message.from;
-            if (user._id === (fromSelf ? message.to : message.from)) {
-              return {
-                ...user,
-                messages: [
-                  ...user.messages,
-                  {
-                    ...message,
-                    isRead: user._id === selectedChatUser?._id ? true : false,
-                  },
-                ],
-              };
-            }
-            return user;
-          }),
-        );
-      }
-      setSelectedChatUser((prevState) =>
-        prevState &&
-        (prevState._id === message.from || prevState._id === message.to)
-          ? {
-              ...prevState,
-              messages: [...prevState?.messages, { ...message, isRead: true }],
-            }
-          : prevState,
-      );
-    });
     return () => {
-      socket.off('privateMessage');
+      setSelectedChatUser(null);
     };
-  }, [data, selectedChatUser, chatUsers]);
-
-  useEffect(() => {
-    socket.emit('newMessages', newMessages);
-  }, [newMessages]);
+  }, [setSelectedChatUser]);
 
   return (
     <Box sx={{ display: 'flex', width: '990px' }}>

@@ -5,7 +5,6 @@ import {
   ArrowPathRoundedSquareIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
-import { useUserData } from '@/app/lib/hooks';
 import Link from 'next/link';
 import apiService from '@/app/lib/apiService';
 import { useSession } from 'next-auth/react';
@@ -28,7 +27,7 @@ export default function ChatUserCard({
   const [anchorEl, setAncholEl] = useState<HTMLElement | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const unreadMessagesNumber = user.messages.filter(
-    ({ isRead }) => !isRead,
+    ({ isRead, from }) => !isRead && from !== data?.currentUser._id,
   ).length;
 
   return (

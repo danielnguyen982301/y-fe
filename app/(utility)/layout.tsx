@@ -1,11 +1,7 @@
 import { Box, Container, Stack } from '@mui/material';
 import MainHeader from '../ui/layouts/main-header';
-import MainFooter from '../ui/layouts/main-footer';
-import { auth, signOut } from '@/auth';
-import { isValidToken } from '../lib/utils';
-import { getSession, logOut } from '../lib/actions';
-import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import ChatProvider from '../ChatProvider';
+import NotificationProvider from '../NotificationProvider';
 
 export default function Layout({
   modal,
@@ -17,14 +13,16 @@ export default function Layout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <Container maxWidth={false} sx={{ display: 'flex' }}>
-        {modal}
-        {/* <Box>{modal}</Box> */}
-        <MainHeader />
-        {primary}
-        {children}
-      </Container>
-    </>
+    <NotificationProvider>
+      <ChatProvider>
+        <Container maxWidth={false} sx={{ display: 'flex' }}>
+          {modal}
+          {/* <Box>{modal}</Box> */}
+          <MainHeader />
+          {primary}
+          {children}
+        </Container>
+      </ChatProvider>
+    </NotificationProvider>
   );
 }

@@ -105,3 +105,16 @@ export type Message = {
 export type ChatUser = User & {
   messages: Message[];
 };
+
+export type Notification = {
+  _id: string;
+  sender: User;
+  event: 'mention' | 'repost' | 'reply' | 'follow';
+  recipient: string;
+  mentionLocationType?: 'Post' | 'Reply';
+  mentionLocation?: Post | Reply;
+  repostType?: 'Post' | 'Reply';
+  repost?: Post | Reply;
+  reply?: Reply;
+  isRead: boolean;
+};

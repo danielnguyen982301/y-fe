@@ -1,8 +1,13 @@
 'use client';
 
 import { useContext } from 'react';
-import { UserContext } from '../UserProvider';
+import { ChatContext } from '../ChatProvider';
+import { NotifContext } from '../NotificationProvider';
 
-export const useUserData = () => {
-  return useContext(UserContext);
+export const useChat = () => {
+  return useContext(ChatContext);
+};
+
+export const useNotif = () => {
+  return useContext(NotifContext);
 };

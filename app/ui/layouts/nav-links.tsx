@@ -12,12 +12,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 import { Box, Typography } from '@mui/material';
-import { useUserData } from '@/app/lib/hooks';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import socket from '@/app/lib/socket';
 import { ChatUser } from '@/app/lib/definitions';
 import apiService from '@/app/lib/apiService';
+import { useChat, useNotif } from '@/app/lib/hooks';
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
@@ -37,59 +37,8 @@ const links = [
 export default function NavLinks() {
   const pathname = usePathname();
   const { data } = useSession();
-  const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
-  const [newMessages, setNewMessages] = useState(0);
-  const isOnChatRoute = pathname.includes('messages');
-
-  useEffect(() => {
-    if (isOnChatRoute) return;
-    const getChatUsers = async () => {
-      try {
-        const response = await apiService.get('/messages/users');
-        setChatUsers(response.data.chatUsers);
-        setNewMessages(
-          (response.data.chatUsers as ChatUser[]).filter((user) =>
-            user.messages.some(({ isRead }) => !isRead),
-          ).length,
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getChatUsers();
-  }, [isOnChatRoute]);
-
-  useEffect(() => {
-    socket.on('privateMessage', (message) => {
-      if (!isOnChatRoute) {
-        const newChatList = chatUsers.map((user) => {
-          const fromSelf = data?.currentUser._id === message.from;
-          if (user._id === (fromSelf ? message.to : message.from)) {
-            return {
-              ...user,
-              messages: [...user.messages, message],
-            };
-          }
-          return user;
-        });
-        setChatUsers(newChatList);
-        setNewMessages(
-          newChatList.filter((user) =>
-            user.messages.some(({ isRead }) => !isRead),
-          ).length,
-        );
-      }
-    });
-
-    socket.on('newMessages', (newMessages) => {
-      setNewMessages(newMessages);
-    });
-
-    return () => {
-      socket.off('privateMessage');
-      socket.off('newMessages');
-    };
-  }, [chatUsers, data, isOnChatRoute]);
+  const { newMessages } = useChat();
+  const { newNotifs } = useNotif();
 
   return (
     <>
@@ -121,6 +70,20 @@ export default function NavLinks() {
                     }}
                   >
                     {newMessages}
+                  </Box>
+                )}
+                {link.name === 'Notifications' && !!newNotifs && (
+                  <Box
+                    sx={{
+                      bgcolor: 'red',
+                      color: 'white',
+                      position: 'absolute',
+                      top: -10,
+                      right: -8,
+                      px: 0.5,
+                    }}
+                  >
+                    {newNotifs}
                   </Box>
                 )}
                 <LinkIcon className="w-6" />

@@ -9,7 +9,6 @@ import {
   ArrowPathRoundedSquareIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
-import { useUserData } from '@/app/lib/hooks';
 import Link from 'next/link';
 import apiService from '@/app/lib/apiService';
 import { useSession } from 'next-auth/react';
@@ -35,10 +34,7 @@ export default function ReplyDetails({
       relationship === 'followEachOther',
   );
 
-  const transformedReplyContent = transformedContent({
-    content: reply?.content,
-    regex: /(#\w+)/gm,
-  });
+  const transformedReplyContent = transformedContent(reply?.content);
 
   const replyDate = new Date(reply?.createdAt);
 

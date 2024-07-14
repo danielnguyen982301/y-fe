@@ -16,8 +16,12 @@ export default function ChatPanel({
 }) {
   const [messageInput, setMessageInput] = useState('');
   const { data } = useSession();
-  const readMessages = user.messages.filter(({ isRead }) => isRead);
-  const unreadMessages = user.messages.filter(({ isRead }) => !isRead);
+  const readMessages = user.messages.filter(
+    ({ isRead, from }) => isRead || from === data?.currentUser._id,
+  );
+  const unreadMessages = user.messages.filter(
+    ({ isRead, from }) => !isRead && from !== data?.currentUser._id,
+  );
   const transformedCreatedTime = (createdDate: string) => {
     const date = new Date(createdDate);
     return date

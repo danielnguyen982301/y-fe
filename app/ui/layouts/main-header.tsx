@@ -8,7 +8,6 @@ import { Stack } from '@mui/material';
 import { logOut } from '@/app/lib/actions';
 import SideNav from './sidenav';
 import AccountMenu from './account-menu';
-import { useUserData } from '@/app/lib/hooks';
 import { useSession } from 'next-auth/react';
 import { User } from '@/app/lib/definitions';
 import socket from '@/app/lib/socket';

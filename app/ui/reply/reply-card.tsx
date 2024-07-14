@@ -8,7 +8,6 @@ import {
   ArrowPathRoundedSquareIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
-import { useUserData } from '@/app/lib/hooks';
 import Link from 'next/link';
 import apiService from '@/app/lib/apiService';
 import { useSession } from 'next-auth/react';
@@ -16,6 +15,7 @@ import ReplyStats from './reply-stats';
 import { useRouter } from 'next/navigation';
 import { transformedContent } from '../form/form-mention-textfield';
 import DeleteConfirmModal from '../modal/delete-confirm-modal';
+import { transformedDateAndTime } from '@/app/lib/utils';
 
 export default function ReplyCard({
   reply,
@@ -42,31 +42,7 @@ export default function ReplyCard({
   );
   const targetAuthorUsername = (reply?.target as Post | Reply)?.author
     ?.username;
-  const transformedReplyContent = transformedContent({
-    content: reply?.content,
-    regex: /(#\w+)/gm,
-  });
-
-  const replyDate = new Date(reply.createdAt);
-  const currentDate = new Date();
-  const timeDiff = Date.now() - replyDate.getTime();
-  const replyTime =
-    timeDiff < 1000 * 60
-      ? `${Math.floor(timeDiff / 1000)}s`
-      : timeDiff < 1000 * 60 * 60
-      ? `${Math.floor(timeDiff / (1000 * 60))}m`
-      : timeDiff < 1000 * 60 * 60 * 24
-      ? `${Math.floor(timeDiff / (1000 * 60 * 60))}h`
-      : currentDate.getFullYear() === replyDate.getFullYear()
-      ? replyDate.toLocaleString('en-US', {
-          month: 'short',
-          day: 'numeric',
-        })
-      : replyDate.toLocaleString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        });
+  const transformedReplyContent = transformedContent(reply?.content);
 
   useEffect(() => {
     if (reply.mediaFile) {
@@ -94,9 +70,7 @@ export default function ReplyCard({
     <>
       <Stack
         onClick={() =>
-          router.push(
-            `/main/${data?.currentUser.username}/replies/${reply?._id}`,
-          )
+          router.push(`/main/${reply.author.username}/replies/${reply?._id}`)
         }
         sx={{
           width: '100%',
@@ -179,7 +153,7 @@ export default function ReplyCard({
                     },
                   }}
                 >
-                  {replyTime}
+                  {transformedDateAndTime(reply?.createdAt)}
                 </Typography>
               </Box>
               <Box

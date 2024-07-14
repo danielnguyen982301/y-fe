@@ -1,6 +1,5 @@
 'use client';
 
-import { useUserData } from '@/app/lib/hooks';
 import { Avatar, Box, Button, Stack, Typography } from '@mui/material';
 import React, {
   Dispatch,
@@ -23,6 +22,7 @@ import { cloudinaryUpload } from '@/app/lib/utils';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { isEqual } from 'lodash';
+import socket from '@/app/lib/socket';
 
 const yupSchema = Yup.object().shape({
   content: Yup.string().required('Content is required'),
@@ -108,21 +108,24 @@ export default function PostForm({
   const isEditedContentDifferent = !isEqual(initialTargetContent, formData);
   const isReply = replyTarget || (editTarget && editTargetType === 'Reply');
 
-  const onSubmit = async (data: PostFormData) => {
-    let { content } = data;
-    const regex = /#\[(\w+)\]|#(\w+)/gm;
+  const onSubmit = async (formData: PostFormData) => {
+    let { content } = formData;
+    const regex = /#\[(\w+)\]|#(\w+)|@\((\w+)\)\[([\s\w\-]+)\]/gm;
     let result;
     const tagNames = [];
+    const mentionedTargets = [];
     while ((result = regex.exec(content)) !== null) {
-      const [, existingTag, newTag] = result;
+      const [, existingTag, newTag, mentionedUser] = result;
       if (existingTag) tagNames.push(existingTag);
       if (newTag) tagNames.push(newTag);
+      if (mentionedUser) mentionedTargets.push(mentionedUser);
     }
 
     const transformedContent = content.replace(
-      /#\[(\w+)\]/gm,
-      (match, p1) => `#${p1}`,
+      /#\[(\w+)\]|@\(\w+\)\[([\s\w\-]+)\]/gm,
+      (match, p1, p2) => (p1 ? `#${p1}` : `@${p2.split('-')[1]}`),
     );
+
     let response;
     try {
       const bodyData: {
@@ -136,13 +139,31 @@ export default function PostForm({
       };
       if (mediaFile && typeof mediaFile === 'object')
         bodyData.mediaFile = await cloudinaryUpload(mediaFile as File);
-      if (setNewPost) {
+      if (setNewPost || postModal) {
         response = await apiService.post('/posts', bodyData);
-        await apiService.post('/hashtags', {
-          hashtags: tagNames,
-          postId: response.data.post._id,
-        });
-        setNewPost(response.data);
+        if (setNewPost) {
+          setNewPost(response.data);
+        }
+        if (tagNames.length) {
+          await apiService.post('/hashtags', {
+            hashtags: tagNames,
+            postId: response.data.post._id,
+          });
+        }
+        if (mentionedTargets.length) {
+          const actualTargets = mentionedTargets.filter(
+            (target) => target !== data?.currentUser._id,
+          );
+          await apiService.post('/notifications/mentions', {
+            mentionedTargets: actualTargets,
+            mentionLocationType: 'Post',
+            mentionLocation: response.data.post._id,
+          });
+          socket.emit('mention', actualTargets);
+        }
+        if (postModal) {
+          router.push('/main/home');
+        }
       }
       if (setNewReply) {
         bodyData.targetType = replyTargetType;
@@ -156,6 +177,18 @@ export default function PostForm({
               ];
         response = await apiService.post('/replies', bodyData);
         setNewReply(response.data);
+        socket.emit('replyNotif', replyTarget?.author._id);
+        if (mentionedTargets.length) {
+          const actualTargets = mentionedTargets.filter(
+            (target) => target !== data?.currentUser._id,
+          );
+          await apiService.post('/notifications/mentions', {
+            mentionedTargets: actualTargets,
+            mentionLocationType: 'Reply',
+            mentionLocation: response.data.reply._id,
+          });
+          socket.emit('mentionNotif', actualTargets);
+        }
       }
       if (editTargetType && editTarget) {
         await apiService.put(
@@ -171,14 +204,6 @@ export default function PostForm({
           });
         }
         router.back();
-      }
-      if (postModal) {
-        response = await apiService.post('/posts', bodyData);
-        await apiService.post('/hashtags', {
-          hashtags: tagNames,
-          postId: response.data.post._id,
-        });
-        router.push('/main/home');
       }
       reset();
     } catch (error) {

@@ -2,7 +2,6 @@
 
 import apiService from '@/app/lib/apiService';
 import { Post, Reply, Thread, User } from '@/app/lib/definitions';
-import { useUserData } from '@/app/lib/hooks';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Box, Stack } from '@mui/material';
 import React, { useEffect, useState } from 'react';

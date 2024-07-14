@@ -2,7 +2,6 @@
 
 import apiService from '@/app/lib/apiService';
 import { User } from '@/app/lib/definitions';
-import { useUserData } from '@/app/lib/hooks';
 import LikeList from '@/app/ui/like/like-list';
 import PostList from '@/app/ui/post/post-list';
 import ReplyList from '@/app/ui/reply/reply-list';
