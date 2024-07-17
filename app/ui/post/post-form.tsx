@@ -139,6 +139,7 @@ export default function PostForm({
       };
       if (mediaFile && typeof mediaFile === 'object')
         bodyData.mediaFile = await cloudinaryUpload(mediaFile as File);
+
       if (setNewPost || postModal) {
         response = await apiService.post('/posts', bodyData);
         if (setNewPost) {
@@ -159,12 +160,13 @@ export default function PostForm({
             mentionLocationType: 'Post',
             mentionLocation: response.data.post._id,
           });
-          socket.emit('mention', actualTargets);
+          socket.emit('mentionNotif', actualTargets);
         }
         if (postModal) {
           router.push('/main/home');
         }
       }
+
       if (setNewReply) {
         bodyData.targetType = replyTargetType;
         bodyData.targetId = replyTarget?._id;
@@ -190,6 +192,7 @@ export default function PostForm({
           socket.emit('mentionNotif', actualTargets);
         }
       }
+
       if (editTargetType && editTarget) {
         await apiService.put(
           `/${editTargetType === 'Post' ? 'posts' : 'replies'}/original/${

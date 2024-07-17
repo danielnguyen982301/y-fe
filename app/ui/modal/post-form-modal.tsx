@@ -33,7 +33,9 @@ export default function PostFormModal({
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
-    if (!pathname.includes('compose')) {
+    if (pathname.includes('compose')) {
+      setOpen(true);
+    } else {
       setOpen(false);
     }
   }, [pathname]);

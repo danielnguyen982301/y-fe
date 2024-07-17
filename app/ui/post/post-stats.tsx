@@ -2,6 +2,7 @@
 
 import apiService from '@/app/lib/apiService';
 import { Post } from '@/app/lib/definitions';
+import socket from '@/app/lib/socket';
 import {
   BookmarkIcon,
   ChartBarIcon,
@@ -14,6 +15,8 @@ import {
   HeartIcon as UnlikedHeart,
 } from '@heroicons/react/24/outline';
 import { Box, Tooltip, Typography } from '@mui/material';
+import { pick } from 'lodash';
+import { useSession } from 'next-auth/react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 export default function PostStats({
@@ -25,6 +28,8 @@ export default function PostStats({
   detailed?: boolean;
   newReplyCount?: number;
 }) {
+  const { data } = useSession();
+
   const stats = useMemo(
     () => ({
       likeCount: post?.likeCount,
@@ -78,6 +83,15 @@ export default function PostStats({
             repostType: 'Post',
             repostId: postId,
           });
+
+      if (response.data.notif) {
+        socket.emit(
+          'toggleRepostNotif',
+          postStates.isReposted
+            ? { ...response.data.notif, delete: true }
+            : response.data.notif,
+        );
+      }
       setPostStats({ ...postStats, repostCount: response.data.repostCount });
       setPostStates({ ...postStates, isReposted: !postStates.isReposted });
     } catch (error) {

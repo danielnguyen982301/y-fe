@@ -2,6 +2,7 @@
 
 import apiService from '@/app/lib/apiService';
 import { Follow, User } from '@/app/lib/definitions';
+import socket from '@/app/lib/socket';
 import { Avatar, Box, Button, Stack, Typography } from '@mui/material';
 import { useSession } from 'next-auth/react';
 import React, { Dispatch, SetStateAction, useState } from 'react';
@@ -18,9 +19,15 @@ export default function UserCard({ user }: { user: User }) {
 
   const handleToggleFollow = async (userId: string) => {
     try {
-      isFollowed
+      const response = isFollowed
         ? await apiService.delete('/follows', { data: { followeeId: userId } })
         : await apiService.post('/follows', { followeeId: userId });
+      socket.emit(
+        'toggleFollowNotif',
+        isFollowed
+          ? { ...response.data.notif, delete: true }
+          : response.data.notif,
+      );
       setIsFollowed(!isFollowed);
     } catch (error) {
       console.log(error);

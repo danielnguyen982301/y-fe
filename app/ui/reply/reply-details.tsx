@@ -15,6 +15,7 @@ import { useSession } from 'next-auth/react';
 import { transformedContent } from '../form/form-mention-textfield';
 import DeleteConfirmModal from '../modal/delete-confirm-modal';
 import { useRouter } from 'next/navigation';
+import socket from '@/app/lib/socket';
 
 export default function ReplyDetails({
   reply,
@@ -51,9 +52,15 @@ export default function ReplyDetails({
   const handleToggleFollow = async (userId: string) => {
     setAncholEl(null);
     try {
-      isFollowed
+      const response = isFollowed
         ? await apiService.delete('/follows', { data: { followeeId: userId } })
         : await apiService.post('/follows', { followeeId: userId });
+      socket.emit(
+        'toggleFollowNotif',
+        isFollowed
+          ? { ...response.data.notif, delete: true }
+          : response.data.notif,
+      );
       setIsFollowed(!isFollowed);
     } catch (error) {
       console.log(error);

@@ -5,6 +5,7 @@ import { Follow, User } from '@/app/lib/definitions';
 import { Stack } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import UserCard from './user-card';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 export default function UserList({
   query,
@@ -16,6 +17,8 @@ export default function UserList({
   selectedUser?: User;
 }) {
   const [users, setUsers] = useState<User[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -37,18 +40,37 @@ export default function UserList({
           );
         }
 
-        if (response) setUsers(response.data.users);
+        if (response) {
+          setTotalPages(response.data.totalPages);
+          const axiosResponse = response;
+          currentPage === 1
+            ? setUsers(response.data.users)
+            : setUsers((prevState) => [
+                ...prevState,
+                ...axiosResponse?.data.users,
+              ]);
+        }
       } catch (error) {
         console.log(error);
       }
     };
     getUsers();
-  }, [query, tab, selectedUser]);
+  }, [query, tab, selectedUser, currentPage]);
 
   return (
     <Stack>
-      {!!users.length &&
-        users.map((user) => <UserCard key={user?._id} user={user} />)}
+      {!!users.length && (
+        <InfiniteScroll
+          dataLength={users.length}
+          next={() => setCurrentPage(currentPage + 1)}
+          hasMore={users.length >= 10 && currentPage < totalPages}
+          loader={<h4>Loading...</h4>}
+        >
+          {users.map((user) => (
+            <UserCard key={user?._id} user={user} />
+          ))}
+        </InfiniteScroll>
+      )}
     </Stack>
   );
 }

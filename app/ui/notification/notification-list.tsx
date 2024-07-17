@@ -1,7 +1,7 @@
 'use client';
 
 import apiService from '@/app/lib/apiService';
-import { Follow, Post, Reply, User } from '@/app/lib/definitions';
+import { Follow, Notification, Post, Reply, User } from '@/app/lib/definitions';
 import { useNotif } from '@/app/lib/hooks';
 import { Stack } from '@mui/material';
 import React, { useEffect, useState } from 'react';
@@ -10,11 +10,11 @@ import ReplyCard from '../reply/reply-card';
 import NotificationRepostCard from './notification-repost-card';
 import NotificationFollowCard from './notification-follow-card';
 
-export default function NotificationList({ tab }: { tab: string }) {
-  const { notifs, setNotifs } = useNotif();
-  if (tab === 'mention') {
-    setNotifs(notifs.filter(({ event }) => event === 'mention'));
-  }
+export default function NotificationList({
+  notifs,
+}: {
+  notifs: Notification[];
+}) {
   return (
     <Stack>
       {!!notifs.length &&
@@ -24,39 +24,44 @@ export default function NotificationList({ tab }: { tab: string }) {
               if (notif.mentionLocationType === 'Post') {
                 return (
                   <PostCard
-                    key={notif.mentionLocation?._id}
+                    key={notif._id}
                     post={notif.mentionLocation as Post}
+                    isNotifRead={notif.isRead}
                   />
                 );
               } else {
                 return (
                   <ReplyCard
-                    key={notif.mentionLocation?._id}
+                    key={notif._id}
                     reply={notif.mentionLocation as Reply}
+                    isNotifRead={notif.isRead}
                   />
                 );
               }
             case 'repost':
               return (
                 <NotificationRepostCard
-                  key={notif.repost?._id}
+                  key={notif._id}
                   sender={notif.sender}
                   repostType={notif.repostType as 'Post' | 'Reply'}
                   repost={notif.repost as Post | Reply}
+                  isNotifRead={notif.isRead}
                 />
               );
             case 'follow':
               return (
                 <NotificationFollowCard
-                  key={notif.sender._id}
+                  key={notif._id}
                   sender={notif.sender}
+                  isNotifRead={notif.isRead}
                 />
               );
             case 'reply':
               return (
                 <ReplyCard
-                  key={notif.reply?._id}
+                  key={notif._id}
                   reply={notif.reply as Reply}
+                  isNotifRead={notif.isRead}
                 />
               );
             default:

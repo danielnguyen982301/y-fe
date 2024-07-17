@@ -9,39 +9,66 @@ import NotificationList from '@/app/ui/notification/notification-list';
 import SearchBar from '@/app/ui/search-bar';
 import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { useSession } from 'next-auth/react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 export default function Page() {
   const { data } = useSession();
-  const { notifs, setNotifs } = useNotif();
+  const {
+    notifs,
+    setNotifs,
+    setUnreadNotifCount,
+    isNotifMounted,
+    setIsNotifMounted,
+  } = useNotif();
   const [currentTab, setCurrentTab] = useState('All');
+  const mentionNotifs = notifs.filter(({ event }) => event === 'mention');
 
   const TABS = [
     {
       name: 'All',
-      component: <NotificationList tab={currentTab} />,
+      component: <NotificationList notifs={notifs} />,
     },
     {
       name: 'Mentions',
-      component: <NotificationList tab={currentTab} />,
+      component: <NotificationList notifs={mentionNotifs} />,
     },
   ];
+
+  useEffect(() => {
+    setIsNotifMounted(true);
+  }, [setIsNotifMounted]);
 
   useEffect(() => {
     const unreadNotifs = notifs
       .filter(({ isRead }) => !isRead)
       .map(({ _id }) => _id);
     if (!unreadNotifs.length) return;
+    setUnreadNotifCount(0);
     const updateNotifStatus = async () => {
       try {
         await apiService.put('/notifications/status', { notifs: unreadNotifs });
-        setNotifs(notifs.map((notif) => ({ ...notif, isRead: true })));
+        // setNotifs(notifs.map((notif) => ({ ...notif, isRead: true })));
       } catch (error) {
         console.log(error);
       }
     };
     updateNotifStatus();
-  }, [notifs, setNotifs]);
+
+    // return () => {
+    //   setNotifs(notifs.map((notif) => ({ ...notif, isRead: true })));
+    // };
+  }, [notifs, setNotifs, setUnreadNotifCount]);
+
+  useEffect(() => {
+    return () => {
+      if (isNotifMounted) {
+        setNotifs((prevState) =>
+          prevState.map((notif) => ({ ...notif, isRead: true })),
+        );
+        setIsNotifMounted(false);
+      }
+    };
+  }, [setNotifs, isNotifMounted, setIsNotifMounted]);
 
   return (
     <Box sx={{ display: 'flex', width: '1050px' }}>

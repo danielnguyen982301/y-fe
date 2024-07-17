@@ -7,6 +7,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import apiService from '@/app/lib/apiService';
 import { Post, Reply } from '@/app/lib/definitions';
+import socket from '@/app/lib/socket';
+import { omit } from 'lodash';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -44,8 +46,13 @@ export default function DeleteConfirmModal({
       const response = await apiService.delete(
         `/${targetType === 'post' ? 'posts' : 'replies'}/original/${targetId}`,
       );
+      socket.emit('deleteNotif', response.data.notifRecipients);
       if (setUpdatedTarget) {
-        setUpdatedTarget(response.data);
+        setUpdatedTarget(
+          targetType === 'post'
+            ? response.data.post
+            : omit(response.data, ['notifRecipients']),
+        );
       }
       if (chainedOrDetailed) {
         router.push('/main/home');

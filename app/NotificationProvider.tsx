@@ -6,6 +6,7 @@ import {
   SetStateAction,
   createContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import apiService from './lib/apiService';
@@ -17,13 +18,19 @@ import socket from './lib/socket';
 type NotifContextType = {
   notifs: Notification[];
   setNotifs: Dispatch<SetStateAction<Notification[]>>;
-  newNotifs: number;
+  unreadNotifCount: number;
+  setUnreadNotifCount: Dispatch<SetStateAction<number>>;
+  isNotifMounted: boolean;
+  setIsNotifMounted: Dispatch<SetStateAction<boolean>>;
 };
 
 export const NotifContext = createContext<NotifContextType>({
   notifs: [],
   setNotifs: () => {},
-  newNotifs: 0,
+  unreadNotifCount: 0,
+  setUnreadNotifCount: () => {},
+  isNotifMounted: true,
+  setIsNotifMounted: () => {},
 });
 
 export default function NotificationProvider({
@@ -31,46 +38,83 @@ export default function NotificationProvider({
 }: {
   children: ReactNode;
 }) {
-  const { data } = useSession();
+  // const { data } = useSession();
   const [notifs, setNotifs] = useState<Notification[]>([]);
-  const [notifCount, setNotifCount] = useState(0);
+  const [actionCount, setActionCount] = useState(0);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [isNotifMounted, setIsNotifMounted] = useState(true);
 
-  const newNotifs = notifs.filter(({ isRead }) => !isRead).length;
+  // const memoizedSession = useMemo(() => data, [data]);
 
   useEffect(() => {
-    if (!data || !isValidToken(data.accessToken)) return;
+    // if (!memoizedSession || !isValidToken(memoizedSession.accessToken)) return;
     const getNotifs = async () => {
       try {
         const response = await apiService.get('/notifications');
         setNotifs(response.data.notifs);
+        setUnreadNotifCount(
+          response.data.notifs.filter(
+            ({ isRead }: { isRead: boolean }) => !isRead,
+          ).length,
+        );
       } catch (error) {
         console.log(error);
       }
     };
     getNotifs();
-  }, [data, notifCount]);
+  }, [actionCount]);
 
   useEffect(() => {
     socket.on('mentionNotif', () => {
-      setNotifCount(notifCount + 1);
+      setActionCount(actionCount + 1);
     });
 
     socket.on('replyNotif', () => {
-      setNotifCount(notifCount + 1);
+      setActionCount(actionCount + 1);
+    });
+
+    socket.on('toggleRepostNotif', (repostNotif) => {
+      if (repostNotif.delete) {
+        setNotifs(notifs.filter(({ _id }) => _id !== repostNotif._id));
+        setUnreadNotifCount(unreadNotifCount ? unreadNotifCount - 1 : 0);
+      } else {
+        setNotifs([repostNotif, ...notifs]);
+        setUnreadNotifCount(unreadNotifCount + 1);
+      }
+    });
+
+    socket.on('toggleFollowNotif', (followNotif) => {
+      if (followNotif.delete) {
+        setNotifs(notifs.filter(({ _id }) => _id !== followNotif._id));
+        setUnreadNotifCount(unreadNotifCount ? unreadNotifCount - 1 : 0);
+      } else {
+        setNotifs([followNotif, ...notifs]);
+        setUnreadNotifCount(unreadNotifCount + 1);
+      }
+    });
+
+    socket.on('deleteNotif', () => {
+      setActionCount(actionCount + 1);
     });
 
     return () => {
       socket.off('mentionNotif');
       socket.off('replyNotif');
+      socket.off('toggleRepostNotif');
+      socket.off('toggleFollowNotif');
+      socket.off('deleteNotif');
     };
-  }, [data, notifCount]);
+  }, [actionCount, notifs, unreadNotifCount]);
 
   return (
     <NotifContext.Provider
       value={{
         notifs,
         setNotifs,
-        newNotifs,
+        unreadNotifCount,
+        setUnreadNotifCount,
+        isNotifMounted,
+        setIsNotifMounted,
       }}
     >
       {children}

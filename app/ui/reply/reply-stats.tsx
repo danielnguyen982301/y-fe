@@ -2,6 +2,7 @@
 
 import apiService from '@/app/lib/apiService';
 import { Reply } from '@/app/lib/definitions';
+import socket from '@/app/lib/socket';
 import {
   BookmarkIcon,
   ChartBarIcon,
@@ -14,6 +15,7 @@ import {
   HeartIcon as UnlikedHeart,
 } from '@heroicons/react/24/outline';
 import { Box, Tooltip, Typography } from '@mui/material';
+import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 
 export default function ReplyStats({
@@ -78,6 +80,15 @@ export default function ReplyStats({
             repostType: 'Reply',
             repostId: replyId,
           });
+
+      if (response.data.notif) {
+        socket.emit(
+          'toggleRepostNotif',
+          replyStates.isReposted
+            ? { ...response.data.notif, delete: true }
+            : response.data.notif,
+        );
+      }
       setReplyStats({ ...replyStats, repostCount: response.data.repostCount });
       setReplyStates({ ...replyStates, isReposted: !replyStates.isReposted });
     } catch (error) {

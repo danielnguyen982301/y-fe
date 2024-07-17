@@ -76,6 +76,7 @@ export type Hashtag = {
   _id: string;
   name: string;
   posts: string[];
+  postCount: number;
 };
 
 export type Like = {
@@ -105,6 +106,15 @@ export type Message = {
 export type ChatUser = User & {
   messages: Message[];
 };
+
+// export type NotifRepost =
+//   | Pick<Post, 'author' | 'content' | '_id'>
+//   | Pick<Reply, 'author' | 'content' | '_id'>;
+
+// export type NotifSender = Pick<
+//   User,
+//   '_id' | 'avatar' | 'username' | 'displayName'
+// >;
 
 export type Notification = {
   _id: string;

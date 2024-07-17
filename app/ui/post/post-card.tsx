@@ -16,14 +16,17 @@ import { useRouter } from 'next/navigation';
 import DeleteConfirmModal from '../modal/delete-confirm-modal';
 import { transformedContent } from '../form/form-mention-textfield';
 import { transformedDateAndTime } from '@/app/lib/utils';
+import socket from '@/app/lib/socket';
 
 export default function PostCard({
   post,
   chained,
   setUpdatedTarget,
+  isNotifRead,
 }: {
   post: Post;
   chained?: boolean;
+  isNotifRead?: boolean;
   setUpdatedTarget?: Dispatch<
     SetStateAction<Post | { reply: Reply; replyCount: number } | null>
   >;
@@ -53,9 +56,15 @@ export default function PostCard({
   const handleToggleFollow = async (userId: string) => {
     setAncholEl(null);
     try {
-      isFollowed
+      const response = isFollowed
         ? await apiService.delete('/follows', { data: { followeeId: userId } })
         : await apiService.post('/follows', { followeeId: userId });
+      socket.emit(
+        'toggleFollowNotif',
+        isFollowed
+          ? { ...response.data.notif, delete: true }
+          : response.data.notif,
+      );
       setIsFollowed(!isFollowed);
     } catch (error) {
       console.log(error);
@@ -80,7 +89,12 @@ export default function PostCard({
             width: '100%',
             px: 2,
             py: 1,
-            borderBottom: chained ? '' : '1px solid rgb(239, 243, 244)',
+            borderBottom: chained
+              ? ''
+              : isNotifRead === false
+              ? '1px solid rgba(69,68,63,0.5)'
+              : '1px solid rgb(239, 243, 244)',
+            bgcolor: isNotifRead === false ? 'rgba(243,241,197,0.5)' : '',
           }}
         >
           <Stack sx={{ alignItems: 'center' }}>

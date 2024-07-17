@@ -38,7 +38,7 @@ export default function NavLinks() {
   const pathname = usePathname();
   const { data } = useSession();
   const { newMessages } = useChat();
-  const { newNotifs } = useNotif();
+  const { unreadNotifCount } = useNotif();
 
   return (
     <>
@@ -72,7 +72,7 @@ export default function NavLinks() {
                     {newMessages}
                   </Box>
                 )}
-                {link.name === 'Notifications' && !!newNotifs && (
+                {link.name === 'Notifications' && !!unreadNotifCount && (
                   <Box
                     sx={{
                       bgcolor: 'red',
@@ -83,7 +83,7 @@ export default function NavLinks() {
                       px: 0.5,
                     }}
                   >
-                    {newNotifs}
+                    {unreadNotifCount}
                   </Box>
                 )}
                 <LinkIcon className="w-6" />
