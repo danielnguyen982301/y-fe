@@ -1,21 +1,22 @@
 'use client';
 
 import { Box, Button, Modal, Stack, Typography } from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import PostForm from '../post/post-form';
-import { usePathname, useRouter } from 'next/navigation';
-import { XMarkIcon } from '@heroicons/react/20/solid';
+import React, { Dispatch, SetStateAction, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { omit } from 'lodash';
+import { toast } from 'react-toastify';
+import { LoadingButton } from '@mui/lab';
+
 import apiService from '@/app/lib/apiService';
 import { Post, Reply } from '@/app/lib/definitions';
 import socket from '@/app/lib/socket';
-import { omit } from 'lodash';
 
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 600,
+  width: { xs: '100%', sm: 400 },
   bgcolor: 'background.paper',
   borderRadius: '16px',
   boxShadow: 24,
@@ -41,11 +42,16 @@ export default function DeleteConfirmModal({
   chainedOrDetailed?: boolean;
 }) {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
   const handleDelete = async (targetId: string) => {
+    setLoading(true);
     try {
       const response = await apiService.delete(
         `/${targetType === 'post' ? 'posts' : 'replies'}/original/${targetId}`,
       );
+      setLoading(false);
+      toast.success(`Deleted ${targetType} Successfully`);
       socket.emit('deleteNotif', response.data.notifRecipients);
       if (setUpdatedTarget) {
         setUpdatedTarget(
@@ -58,7 +64,7 @@ export default function DeleteConfirmModal({
         router.push('/main/home');
       }
     } catch (error) {
-      console.log(error);
+      toast.error('Something went wrong');
     }
   };
 
@@ -72,23 +78,44 @@ export default function DeleteConfirmModal({
       >
         <Box sx={style}>
           <Stack>
-            <Box>
+            <Box sx={{ textAlign: 'center' }}>
               Are you sure you want to{' '}
               <Typography sx={{ fontWeight: 'bold' }} component="span">
                 delete
               </Typography>{' '}
               this {targetType} ?
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
               <Box>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   variant="contained"
-                  sx={{ bgcolor: 'red' }}
+                  sx={{
+                    textTransform: 'none',
+                    bgcolor: 'rgb(244,33,46)',
+                    mr: 2,
+                    fontWeight: 'bold',
+                    borderRadius: 9999,
+                    '&:hover': { bgcolor: 'rgb(220,30,41)' },
+                  }}
                   onClick={() => handleDelete(targetId)}
                 >
                   Delete
-                </Button>
-                <Button variant="contained" onClick={() => setOpen(false)}>
+                </LoadingButton>
+                <Button
+                  sx={{
+                    textTransform: 'none',
+                    bgcolor: 'white',
+                    color: 'black',
+                    border: '1px solid rgb(207,217,222)',
+                    mr: 2,
+                    fontWeight: 'bold',
+                    borderRadius: 9999,
+                    '&:hover': { bgcolor: 'rgba(15,20,25,0.1)' },
+                  }}
+                  variant="contained"
+                  onClick={() => setOpen(false)}
+                >
                   Cancel
                 </Button>
               </Box>

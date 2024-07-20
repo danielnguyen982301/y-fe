@@ -1,11 +1,13 @@
 'use client';
 
-import apiService from '@/app/lib/apiService';
-import { Follow, User } from '@/app/lib/definitions';
 import { Stack } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import UserCard from './user-card';
 import InfiniteScroll from 'react-infinite-scroll-component';
+
+import apiService from '@/app/lib/apiService';
+import { User } from '@/app/lib/definitions';
+import UserCard from './user-card';
+import LoadingScreen from '../loading-screen';
 
 export default function UserList({
   query,
@@ -16,6 +18,7 @@ export default function UserList({
   tab: string;
   selectedUser?: User;
 }) {
+  const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -23,6 +26,7 @@ export default function UserList({
   useEffect(() => {
     const getUsers = async () => {
       let response;
+      setLoading(true);
       try {
         if (tab === 'People' && !query?.startsWith('#')) {
           response = await apiService.get('/users', {
@@ -50,6 +54,7 @@ export default function UserList({
                 ...axiosResponse?.data.users,
               ]);
         }
+        setLoading(false);
       } catch (error) {
         console.log(error);
       }
@@ -57,14 +62,16 @@ export default function UserList({
     getUsers();
   }, [query, tab, selectedUser, currentPage]);
 
-  return (
+  return loading && currentPage === 1 ? (
+    <LoadingScreen />
+  ) : (
     <Stack>
       {!!users.length && (
         <InfiniteScroll
           dataLength={users.length}
           next={() => setCurrentPage(currentPage + 1)}
           hasMore={users.length >= 10 && currentPage < totalPages}
-          loader={<h4>Loading...</h4>}
+          loader={<LoadingScreen />}
         >
           {users.map((user) => (
             <UserCard key={user?._id} user={user} />

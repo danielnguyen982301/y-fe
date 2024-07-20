@@ -1,8 +1,10 @@
-import { ChatUser } from '@/app/lib/definitions';
 import { Avatar, Box, Stack, Typography } from '@mui/material';
-import React from 'react';
+import { useRouter } from 'next/navigation';
+
+import { ChatUser } from '@/app/lib/definitions';
 
 export default function ChatUserInfo({ user }: { user: ChatUser }) {
+  const router = useRouter();
   const createdDate = new Date(user?.createdAt);
   const transformedDate = createdDate.toLocaleString('en-US', {
     month: 'long',
@@ -10,11 +12,17 @@ export default function ChatUserInfo({ user }: { user: ChatUser }) {
   });
   return (
     <Stack
+      onClick={() => router.push(`/main/${user.username}`)}
       sx={{
         alignItems: 'center',
         justifyContent: 'center',
         borderBottom: '1px solid rgb(239, 243, 244)',
         m: 2,
+        p: 2,
+        '&:hover': {
+          bgcolor: 'rgb(247,249,249)',
+          cursor: 'pointer',
+        },
       }}
     >
       <Box>
@@ -42,7 +50,7 @@ export default function ChatUserInfo({ user }: { user: ChatUser }) {
             fontSize: 15,
             '&::before': {
               content: `"•"`,
-              mx: 1,
+              mx: 0.5,
             },
           }}
         >

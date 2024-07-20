@@ -1,6 +1,6 @@
-import { Follow, User } from '@/app/lib/definitions';
 import { Avatar, Box, Stack, Typography } from '@mui/material';
-import React from 'react';
+
+import { User } from '@/app/lib/definitions';
 
 export default function UserSuggestionCard({ user }: { user: User }) {
   const relationship = user.relationship;

@@ -11,21 +11,25 @@ import {
 import { LoadingButton } from '@mui/lab';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import Link from 'next/link';
+
 import apiService from '@/app/lib/apiService';
-import { signIn } from '@/auth';
 import FormProvider from '@/app/ui/form/form-provider';
 import FTextField from '@/app/ui/form/form-textfield';
-import Link from 'next/link';
 import { authenticate } from '@/app/lib/actions';
-import socket from '@/app/lib/socket';
 
 const RegisterSchema = Yup.object().shape({
-  username: Yup.string().required('Username is required'),
-  displayName: Yup.string().required('Display Name is required'),
+  username: Yup.string()
+    .min(6, 'Username must have at least 6 characters')
+    .max(24, 'Username can only have maximum of 24 characters')
+    .required('Username is required'),
+  displayName: Yup.string()
+    .min(6, 'Display name must have at least 6 characters')
+    .max(30, 'Display can only have maximum of 30 characters')
+    .required('Display Name is required'),
   email: Yup.string().email('Invalid email').required('Email is required'),
   password: Yup.string().required('Password is required'),
   passwordConfirmation: Yup.string()
@@ -75,11 +79,11 @@ export default function Page() {
         password,
       });
       await authenticate({ email, password });
-      // socket.connect();
     } catch (error) {
-      console.log(error);
       reset();
-      setError('root.responseError', error as Error);
+      setError('root.responseError', {
+        message: 'Something went wrong',
+      });
     }
   };
 
@@ -91,12 +95,15 @@ export default function Page() {
             <Alert severity="error">{errors.root.responseError.message}</Alert>
           )}
           <Alert severity="info">
-            Already have an account? <Link href="/login">Sign in</Link>
+            Already have an account?{' '}
+            <Link href="/login" className="text-blue-600 underline">
+              Sign in
+            </Link>
           </Alert>
 
           <FTextField name="username" label="Username" />
           <FTextField name="displayName" label="Display Name" />
-          <FTextField name="email" label="Email address" />
+          <FTextField name="email" label="Email Address" />
           <FTextField
             name="password"
             label="Password"

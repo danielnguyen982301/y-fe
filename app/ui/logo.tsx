@@ -1,25 +1,37 @@
-import Image from 'next/image';
 import { Box } from '@mui/material';
 import Link from 'next/link';
 
-function Logo({
-  disabledLink = false,
-  sx,
-}: {
-  disabledLink?: boolean;
-  sx?: Record<string, any>;
-}) {
-  const logo = (
+export default function Logo({ sx }: { sx: Record<string, any> }) {
+  return (
     <Box sx={{ ...sx }}>
-      <Image src="/logo.png" alt="logo" width={40} height={40} />
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 100 100"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M 20 10 L 50 50"
+          stroke="black"
+          strokeWidth="8"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d="M 80 10 L 50 50"
+          stroke="black"
+          strokeWidth="8"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d="M 50 50 L 20 90"
+          stroke="black"
+          strokeWidth="8"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </svg>
     </Box>
   );
-
-  if (disabledLink) {
-    return <>{logo}</>;
-  }
-
-  return <Link href="/">{logo}</Link>;
 }
-
-export default Logo;

@@ -1,18 +1,15 @@
 'use client';
 
+import { Box, Stack, Tab, Tabs } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+
 import apiService from '@/app/lib/apiService';
 import { useNotif } from '@/app/lib/hooks';
-import socket from '@/app/lib/socket';
-import ChatPanel from '@/app/ui/chat/chat-panel';
-import ChatUserCard from '@/app/ui/chat/chat-user-card';
 import NotificationList from '@/app/ui/notification/notification-list';
 import SearchBar from '@/app/ui/search-bar';
-import { Box, Stack, Tab, Tabs } from '@mui/material';
-import { useSession } from 'next-auth/react';
-import React, { useEffect, useRef, useState } from 'react';
+import TrendingTagList from '@/app/ui/side-search/trending-tag-list';
 
 export default function Page() {
-  const { data } = useSession();
   const {
     notifs,
     setNotifs,
@@ -22,6 +19,9 @@ export default function Page() {
   } = useNotif();
   const [currentTab, setCurrentTab] = useState('All');
   const mentionNotifs = notifs.filter(({ event }) => event === 'mention');
+  const unreadNotifs = notifs
+    .filter(({ isRead }) => !isRead)
+    .map(({ _id }) => _id);
 
   const TABS = [
     {
@@ -39,25 +39,17 @@ export default function Page() {
   }, [setIsNotifMounted]);
 
   useEffect(() => {
-    const unreadNotifs = notifs
-      .filter(({ isRead }) => !isRead)
-      .map(({ _id }) => _id);
     if (!unreadNotifs.length) return;
     setUnreadNotifCount(0);
     const updateNotifStatus = async () => {
       try {
         await apiService.put('/notifications/status', { notifs: unreadNotifs });
-        // setNotifs(notifs.map((notif) => ({ ...notif, isRead: true })));
       } catch (error) {
         console.log(error);
       }
     };
     updateNotifStatus();
-
-    // return () => {
-    //   setNotifs(notifs.map((notif) => ({ ...notif, isRead: true })));
-    // };
-  }, [notifs, setNotifs, setUnreadNotifCount]);
+  }, [unreadNotifs, setNotifs, setUnreadNotifCount]);
 
   useEffect(() => {
     return () => {
@@ -71,16 +63,17 @@ export default function Page() {
   }, [setNotifs, isNotifMounted, setIsNotifMounted]);
 
   return (
-    <Box sx={{ display: 'flex', width: '1050px' }}>
+    <Box sx={{ display: 'flex', width: { xs: '100%', sm: '1050px' } }}>
       <Stack
         sx={{
-          maxWidth: '600px',
-          width: '100%',
+          width: { xs: '100%', sm: '500px', lg: '600px' },
           borderRight: '1px solid rgb(239, 243, 244)',
         }}
       >
         <Box>
-          <Box>Notifications</Box>
+          <Box sx={{ fontSize: { xs: 17, sm: 20 }, fontWeight: 'bold', p: 1 }}>
+            Notifications
+          </Box>
         </Box>
         <Tabs
           sx={{ borderBottom: '1px solid rgb(239, 243, 244)', width: '100%' }}
@@ -96,7 +89,7 @@ export default function Page() {
               key={tab.name}
               value={tab.name}
               label={tab.name}
-              sx={{ width: '50%' }}
+              sx={{ width: '50%', textTransform: 'none', fontWeight: 'bold' }}
             />
           ))}
         </Tabs>
@@ -104,6 +97,20 @@ export default function Page() {
           const isMatched = tab.name === currentTab;
           return isMatched && <Stack key={tab.name}>{tab.component}</Stack>;
         })}
+      </Stack>
+      <Stack
+        sx={{
+          display: { xs: 'none', md: 'flex' },
+          width: '300px',
+          height: '100vh',
+          ml: { lg: '20px', md: '10px' },
+          position: 'sticky',
+          top: 0,
+        }}
+        spacing={4}
+      >
+        <SearchBar query="" />
+        <TrendingTagList />
       </Stack>
     </Box>
   );

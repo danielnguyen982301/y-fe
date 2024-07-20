@@ -1,12 +1,14 @@
 'use client';
 
-import { Post, Thread } from '@/app/lib/definitions';
+import { Box, Stack, Tab, Tabs } from '@mui/material';
+import { useSession } from 'next-auth/react';
+import { useState } from 'react';
+
+import { Thread } from '@/app/lib/definitions';
 import PostForm from '@/app/ui/post/post-form';
 import PostList from '@/app/ui/post/post-list';
 import SearchBar from '@/app/ui/search-bar';
-import { Box, Container, Stack, Tab, Tabs } from '@mui/material';
-import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import TrendingTagList from '@/app/ui/side-search/trending-tag-list';
 
 export default function Page() {
   const { data } = useSession();
@@ -31,11 +33,10 @@ export default function Page() {
   ];
 
   return (
-    <Box sx={{ display: 'flex', width: '1050px' }}>
+    <Box sx={{ display: 'flex', width: { xs: '100%', sm: '1050px' } }}>
       <Stack
         sx={{
-          maxWidth: '600px',
-          width: '100%',
+          width: { xs: '100%', sm: '500px', lg: '600px' },
           borderRight: '1px solid rgb(239, 243, 244)',
         }}
       >
@@ -53,7 +54,7 @@ export default function Page() {
               key={tab.name}
               value={tab.name}
               label={tab.name}
-              sx={{ width: '50%' }}
+              sx={{ width: '50%', textTransform: 'none', fontWeight: 'bold' }}
             />
           ))}
         </Tabs>
@@ -65,9 +66,20 @@ export default function Page() {
           })}
         </Stack>
       </Stack>
-      <Box sx={{ width: '350px', ml: '30px' }}>
+      <Stack
+        sx={{
+          display: { xs: 'none', md: 'flex' },
+          width: '300px',
+          height: '100vh',
+          ml: { lg: '20px', md: '10px' },
+          position: 'sticky',
+          top: 0,
+        }}
+        spacing={4}
+      >
         <SearchBar query="" />
-      </Box>
+        <TrendingTagList />
+      </Stack>
     </Box>
   );
 }

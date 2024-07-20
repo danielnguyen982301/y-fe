@@ -1,10 +1,11 @@
 'use client';
 
-import { Box, Button, Modal } from '@mui/material';
+import { Box, Modal } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import PostForm from '../post/post-form';
 import { usePathname, useRouter } from 'next/navigation';
 import { XMarkIcon } from '@heroicons/react/20/solid';
+
+import PostForm from '../post/post-form';
 import { Post, Reply } from '@/app/lib/definitions';
 
 const style = {
@@ -12,7 +13,7 @@ const style = {
   top: '10%',
   left: '50%',
   transform: 'translate(-50%, 0)',
-  width: 600,
+  width: { xs: '100%', sm: 600 },
   bgcolor: 'background.paper',
   borderRadius: '16px',
   boxShadow: 24,

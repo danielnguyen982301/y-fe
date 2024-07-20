@@ -1,11 +1,9 @@
 'use client';
 
-import { Box, Button, Modal } from '@mui/material';
+import { Box, Modal } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import PostForm from '../post/post-form';
 import { usePathname, useRouter } from 'next/navigation';
-import { XMarkIcon } from '@heroicons/react/20/solid';
-import { Post, Reply } from '@/app/lib/definitions';
+
 import UserProfileSetupForm from '../user/user-profile-update-form';
 
 const style = {
@@ -13,7 +11,7 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 600,
+  width: { xs: '100%', sm: 600 },
   height: 650,
   bgcolor: 'background.paper',
   borderRadius: '16px',
@@ -27,7 +25,9 @@ export default function UpdateProfileModal() {
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
-    if (!pathname.includes('settings')) {
+    if (pathname.includes('settings')) {
+      setOpen(true);
+    } else {
       setOpen(false);
     }
   }, [pathname]);

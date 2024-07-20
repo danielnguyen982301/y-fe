@@ -3,12 +3,12 @@
 import * as React from 'react';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
-
 import { Stack } from '@mui/material';
+import { useSession } from 'next-auth/react';
+
 import { logOut } from '@/app/lib/actions';
 import SideNav from './sidenav';
 import AccountMenu from './account-menu';
-import { useSession } from 'next-auth/react';
 import { User } from '@/app/lib/definitions';
 import socket from '@/app/lib/socket';
 
@@ -30,9 +30,7 @@ export default function MainHeader() {
     try {
       handleMenuClose();
       await logOut();
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) {}
   };
 
   const menuId = 'primary-search-account-menu';
@@ -60,38 +58,9 @@ export default function MainHeader() {
 
   React.useEffect(() => {
     if (!data) return;
-    // const sessionId = localStorage.getItem('sessionId');
-
-    // if (sessionId) {
-    //   socket.auth = { sessionId };
-    //   socket.connect();
-    // } else {
-    //   socket.auth = {
-    //     username: data?.currentUser.username,
-    //     userId: data?.currentUser._id,
-    //   };
-    //   socket.connect();
-    // }
     socket.auth = { userId: data?.currentUser._id };
     socket.connect();
 
-    // socket.on(
-    //   'session',
-    //   ({ sessionId, userId }: { sessionId: string; userId: string }) => {
-    //     // attach the session ID to the next reconnection attempts
-    //     socket.auth = { sessionId };
-    //     // store it in the localStorage
-    //     localStorage.setItem('sessionId', sessionId);
-    //     // save the ID of the user
-    //     socket.userId = userId;
-    //   },
-    // );
-
-    // socket.on("connect_error", (err) => {
-    //   if (err.message === "invalid user") {
-
-    //   }
-    // });
     return () => {
       socket.off('connect_error');
     };
@@ -100,11 +69,15 @@ export default function MainHeader() {
   return (
     <Stack
       sx={{
+        display: { xs: 'none', sm: 'flex' },
         borderRight: '1px solid rgb(239, 243, 244)',
         height: '100vh',
-        width: '25vw',
+        maxWidth: 600,
+        width: '100%',
         alignItems: 'flex-end',
         position: 'sticky',
+        py: 1,
+        pr: 2,
         top: 0,
       }}
     >

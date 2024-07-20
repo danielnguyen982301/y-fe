@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { BASE_URL } from './config';
 import { getSession } from './actions';
-import Cookies from 'js-cookie';
 
 const apiService = axios.create({
   baseURL: BASE_URL,
@@ -13,9 +12,7 @@ apiService.interceptors.request.use(
     if (session && session.accessToken) {
       req.headers.Authorization = `Bearer ${session.accessToken}`;
     }
-
     console.log('Request', req);
-
     return req;
   },
   function (err) {

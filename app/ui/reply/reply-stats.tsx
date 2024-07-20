@@ -1,8 +1,5 @@
 'use client';
 
-import apiService from '@/app/lib/apiService';
-import { Reply } from '@/app/lib/definitions';
-import socket from '@/app/lib/socket';
 import {
   BookmarkIcon,
   ChartBarIcon,
@@ -15,8 +12,19 @@ import {
   HeartIcon as UnlikedHeart,
 } from '@heroicons/react/24/outline';
 import { Box, Tooltip, Typography } from '@mui/material';
-import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
+
+import apiService from '@/app/lib/apiService';
+import { Reply } from '@/app/lib/definitions';
+import socket from '@/app/lib/socket';
+
+const iconStyles = {
+  width: 40,
+  height: 40,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
 
 export default function ReplyStats({
   reply,
@@ -138,11 +146,7 @@ export default function ReplyStats({
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Box
           sx={{
-            width: 40,
-            height: 40,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            ...iconStyles,
             color: 'rgb(83, 100, 113)',
             '&:hover': {
               cursor: 'pointer',
@@ -182,11 +186,7 @@ export default function ReplyStats({
               handleToggleRepost(reply?._id);
             }}
             sx={{
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              ...iconStyles,
               color: replyStates.isReposted
                 ? 'rgba(0,186,124)'
                 : 'rgb(83, 100, 113)',
@@ -237,11 +237,7 @@ export default function ReplyStats({
               handleToggleLike(reply?._id);
             }}
             sx={{
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              ...iconStyles,
               color: replyStates.isLiked
                 ? 'rgba(249,24,128)'
                 : 'rgb(83, 100, 113)',
@@ -278,10 +274,7 @@ export default function ReplyStats({
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Box
             sx={{
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
+              ...iconStyles,
               justifyContent: 'center',
             }}
           >
@@ -324,11 +317,7 @@ export default function ReplyStats({
               handleToggleBookmark(reply?._id);
             }}
             sx={{
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              ...iconStyles,
               color: replyStates.isBookmarked
                 ? 'rgba(29,155,240)'
                 : 'rgb(83, 100, 113)',

@@ -1,25 +1,20 @@
 'use client';
 
+import { Box, Stack } from '@mui/material';
+import { useSession } from 'next-auth/react';
+import React, { useEffect } from 'react';
+
 import apiService from '@/app/lib/apiService';
-import { ChatUser, Message, User } from '@/app/lib/definitions';
+import { ChatUser, User } from '@/app/lib/definitions';
 import { useChat } from '@/app/lib/hooks';
 import socket from '@/app/lib/socket';
 import ChatPanel from '@/app/ui/chat/chat-panel';
 import ChatUserCard from '@/app/ui/chat/chat-user-card';
 import SearchBar from '@/app/ui/search-bar';
-import { Box, Stack } from '@mui/material';
-import { useSession } from 'next-auth/react';
-import React, { useEffect, useState } from 'react';
 
 export default function Page() {
   const { data } = useSession();
-  // const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
-  // const [selectedChatUser, setSelectedChatUser] = useState<ChatUser | null>(
-  //   null,
-  // );
-  // const newMessages = chatUsers.filter((user) =>
-  //   user.messages.some(({ isRead }) => !isRead),
-  // ).length;
+
   const { chatUsers, setChatUsers, selectedChatUser, setSelectedChatUser } =
     useChat();
 
@@ -126,45 +121,163 @@ export default function Page() {
   }, [setSelectedChatUser]);
 
   return (
-    <Box sx={{ display: 'flex', width: '990px' }}>
-      <Stack
+    <>
+      <Box
         sx={{
-          maxWidth: '600px',
-          width: '100%',
-          borderRight: '1px solid rgb(239, 243, 244)',
+          display: { xs: 'none', md: 'flex' },
+          width: '990px',
         }}
       >
-        <Box>
-          <Box>Messages</Box>
-        </Box>
-        <SearchBar
-          chatUserSearch
-          handleSelectChatUser={handleSelectChatUserFromSuggestions}
-        />
-        <Stack>
-          {chatUsers.map((user) => (
-            <ChatUserCard
-              isSelected={selectedChatUser?._id === user._id}
-              key={user._id}
-              user={user}
-              handleSelectChatUser={handleSelectChatUser}
+        <Stack
+          sx={{
+            width: { md: '350px', lg: '400px' },
+            borderRight: '1px solid rgb(239, 243, 244)',
+          }}
+        >
+          <Box>
+            <Box
+              sx={{ fontSize: { xs: 17, sm: 20 }, fontWeight: 'bold', p: 1 }}
+            >
+              Messages
+            </Box>
+          </Box>
+          <Box
+            sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}
+          >
+            <SearchBar
+              chatUserSearch
+              handleSelectChatUser={handleSelectChatUserFromSuggestions}
             />
-          ))}
+          </Box>
+          <Stack>
+            {chatUsers.map((user) => (
+              <ChatUserCard
+                isSelected={selectedChatUser?._id === user._id}
+                key={user._id}
+                user={user}
+                handleSelectChatUser={handleSelectChatUser}
+              />
+            ))}
+          </Stack>
         </Stack>
-      </Stack>
-      <Stack
+        <Stack
+          sx={{
+            position: 'sticky',
+            height: '100vh',
+            width: { md: '500px', lg: '550px' },
+            borderRight: '1px solid rgb(239, 243, 244)',
+          }}
+        >
+          {selectedChatUser && (
+            <ChatPanel user={selectedChatUser} onMessage={handleSendMessage} />
+          )}
+        </Stack>
+      </Box>
+
+      <Box
         sx={{
-          position: 'sticky',
-          height: '100vh',
-          maxWidth: '600px',
-          width: '100%',
-          borderRight: '1px solid rgb(239, 243, 244)',
+          display: { xs: 'none', sm: 'flex', md: 'none' },
+          width: '990px',
         }}
       >
+        <Stack
+          sx={{
+            display: selectedChatUser ? 'none' : 'flex',
+            width: '500px',
+            borderRight: '1px solid rgb(239, 243, 244)',
+          }}
+        >
+          <Box>
+            <Box
+              sx={{ fontSize: { xs: 17, sm: 20 }, fontWeight: 'bold', p: 1 }}
+            >
+              Messages
+            </Box>
+          </Box>
+          <Box
+            sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}
+          >
+            <SearchBar
+              chatUserSearch
+              handleSelectChatUser={handleSelectChatUserFromSuggestions}
+            />
+          </Box>
+          <Stack>
+            {chatUsers.map((user) => (
+              <ChatUserCard
+                isSelected={selectedChatUser?._id === user._id}
+                key={user._id}
+                user={user}
+                handleSelectChatUser={handleSelectChatUser}
+              />
+            ))}
+          </Stack>
+        </Stack>
         {selectedChatUser && (
-          <ChatPanel user={selectedChatUser} onMessage={handleSendMessage} />
+          <Stack
+            sx={{
+              position: 'sticky',
+              height: '100vh',
+              width: '600px',
+              borderRight: '1px solid rgb(239, 243, 244)',
+            }}
+          >
+            <ChatPanel user={selectedChatUser} onMessage={handleSendMessage} />
+          </Stack>
         )}
-      </Stack>
-    </Box>
+      </Box>
+
+      <Box
+        sx={{
+          display: { xs: 'flex', sm: 'none' },
+          width: '100%',
+        }}
+      >
+        <Stack
+          sx={{
+            display: selectedChatUser ? 'none' : 'flex',
+            width: '100%',
+            borderRight: '1px solid rgb(239, 243, 244)',
+          }}
+        >
+          <Box>
+            <Box
+              sx={{ fontSize: { xs: 17, sm: 20 }, fontWeight: 'bold', p: 1 }}
+            >
+              Messages
+            </Box>
+          </Box>
+          <Box
+            sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}
+          >
+            <SearchBar
+              chatUserSearch
+              handleSelectChatUser={handleSelectChatUserFromSuggestions}
+            />
+          </Box>
+          <Stack>
+            {chatUsers.map((user) => (
+              <ChatUserCard
+                isSelected={selectedChatUser?._id === user._id}
+                key={user._id}
+                user={user}
+                handleSelectChatUser={handleSelectChatUser}
+              />
+            ))}
+          </Stack>
+        </Stack>
+        {selectedChatUser && (
+          <Stack
+            sx={{
+              height: '100vh',
+              width: '100%',
+              borderRight: '1px solid rgb(239, 243, 244)',
+            }}
+          >
+            <ChatPanel user={selectedChatUser} onMessage={handleSendMessage} />
+          </Stack>
+        )}
+      </Box>
+    </>
   );
 }

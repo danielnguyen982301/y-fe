@@ -1,11 +1,13 @@
 'use client';
 
-import { ChatUser, Message } from '@/app/lib/definitions';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { useSession } from 'next-auth/react';
-import React, { FormEvent, useEffect, useState } from 'react';
+import React, { FormEvent, useEffect, useRef, useState } from 'react';
+import { ArrowLeftIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+
+import { ChatUser, Message } from '@/app/lib/definitions';
 import ChatUserInfo from './chat-user-info';
-import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { useChat } from '@/app/lib/hooks';
 
 export default function ChatPanel({
   user,
@@ -14,8 +16,11 @@ export default function ChatPanel({
   user: ChatUser;
   onMessage: (input: string) => void;
 }) {
+  const { setSelectedChatUser } = useChat();
   const [messageInput, setMessageInput] = useState('');
   const { data } = useSession();
+  const msgHistoryRef = useRef<HTMLDivElement | null>(null);
+  const lastMsgRef = useRef<HTMLDivElement | null>(null);
   const readMessages = user.messages.filter(
     ({ isRead, from }) => isRead || from === data?.currentUser._id,
   );
@@ -76,20 +81,25 @@ export default function ChatPanel({
   };
 
   useEffect(() => {
-    const element = document.getElementById('new-message-notification');
-    element?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
-
-  useEffect(() => {
-    const element = document.getElementById('message-history') as HTMLElement;
-    element.scrollTop = element.scrollHeight;
+    if (msgHistoryRef.current && lastMsgRef.current) {
+      msgHistoryRef.current.scrollTop = lastMsgRef?.current?.offsetTop;
+    }
   }, [user.messages]);
 
   return (
     <Stack sx={{ height: '100%' }}>
-      <Box>{user.displayName}</Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', px: 1, pt: 1 }}>
+        <Box
+          onClick={() => setSelectedChatUser(null)}
+          sx={{ display: { xs: 'block', md: 'none' }, mr: 4 }}
+        >
+          <ArrowLeftIcon width={20} height={20} />
+        </Box>
+        <Box sx={{ fontSize: 17, fontWeight: 'bold' }}>{user.displayName}</Box>
+      </Box>
       <ChatUserInfo user={user} />
       <Stack
+        ref={msgHistoryRef}
         id="message-history"
         sx={{
           flexGrow: 1,
@@ -98,6 +108,7 @@ export default function ChatPanel({
         }}
       >
         {!!readMessages.length && generateChatBubbles(readMessages)}
+        <Box ref={lastMsgRef} id="last-message"></Box>
         {!!unreadMessages.length && (
           <Box
             id="new-message-notification"

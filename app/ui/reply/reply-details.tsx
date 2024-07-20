@@ -1,20 +1,17 @@
 'use client';
 
-import { Reply, Thread } from '@/app/lib/definitions';
 import { Avatar, Box, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import NextImage from 'next/image';
 import React, { useEffect, useState } from 'react';
-import ReplyStats from './reply-stats';
-import {
-  ArrowPathRoundedSquareIcon,
-  EllipsisHorizontalIcon,
-} from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import apiService from '@/app/lib/apiService';
+import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+
+import { Reply } from '@/app/lib/definitions';
+import ReplyStats from './reply-stats';
+import apiService from '@/app/lib/apiService';
 import { transformedContent } from '../form/form-mention-textfield';
 import DeleteConfirmModal from '../modal/delete-confirm-modal';
-import { useRouter } from 'next/navigation';
 import socket from '@/app/lib/socket';
 
 export default function ReplyDetails({
@@ -74,7 +71,6 @@ export default function ReplyDetails({
           sx={{
             width: '100%',
             p: 1,
-            // borderBottom: '1px solid rgb(239, 243, 244)',
           }}
         >
           <Box sx={{ display: 'flex', width: '100%', p: 1 }}>

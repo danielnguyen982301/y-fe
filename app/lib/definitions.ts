@@ -1,8 +1,3 @@
-// This file contains type definitions for your data.
-// It describes the shape of the data, and what data type each property should accept.
-// For simplicity of teaching, we're manually defining these types.
-// However, these types are generated automatically if you're using an ORM such as Prisma.
-
 export type Follow = {
   follower: string;
   followee: string;
@@ -106,15 +101,6 @@ export type Message = {
 export type ChatUser = User & {
   messages: Message[];
 };
-
-// export type NotifRepost =
-//   | Pick<Post, 'author' | 'content' | '_id'>
-//   | Pick<Reply, 'author' | 'content' | '_id'>;
-
-// export type NotifSender = Pick<
-//   User,
-//   '_id' | 'avatar' | 'username' | 'displayName'
-// >;
 
 export type Notification = {
   _id: string;

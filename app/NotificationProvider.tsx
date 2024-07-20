@@ -38,16 +38,12 @@ export default function NotificationProvider({
 }: {
   children: ReactNode;
 }) {
-  // const { data } = useSession();
   const [notifs, setNotifs] = useState<Notification[]>([]);
   const [actionCount, setActionCount] = useState(0);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
-  const [isNotifMounted, setIsNotifMounted] = useState(true);
-
-  // const memoizedSession = useMemo(() => data, [data]);
+  const [isNotifMounted, setIsNotifMounted] = useState(false);
 
   useEffect(() => {
-    // if (!memoizedSession || !isValidToken(memoizedSession.accessToken)) return;
     const getNotifs = async () => {
       try {
         const response = await apiService.get('/notifications');

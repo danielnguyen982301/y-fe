@@ -1,11 +1,8 @@
-import { Post, Reply, User } from '@/app/lib/definitions';
-import {
-  ArrowPathRoundedSquareIcon,
-  UserIcon,
-} from '@heroicons/react/20/solid';
+import { ArrowPathRoundedSquareIcon } from '@heroicons/react/20/solid';
 import { Avatar, Box, Stack, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+
+import { Post, Reply, User } from '@/app/lib/definitions';
 import { findLineBreaks } from '../form/form-mention-textfield';
 
 export default function NotificationRepostCard({

@@ -1,10 +1,12 @@
-import apiService from '@/app/lib/apiService';
-import { Post, Reply, User } from '@/app/lib/definitions';
 import { Stack } from '@mui/material';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import ReplyCard from './reply-card';
 import { usePathname } from 'next/navigation';
 import InfiniteScroll from 'react-infinite-scroll-component';
+
+import apiService from '@/app/lib/apiService';
+import { Post, Reply, User } from '@/app/lib/definitions';
+import ReplyCard from './reply-card';
+import LoadingScreen from '../loading-screen';
 
 export default function ReplyList({
   user,
@@ -24,17 +26,20 @@ export default function ReplyList({
   newUpdatedTarget?: { reply: Reply; replyCount: number };
 }) {
   const pathname = usePathname();
+  const [loading, setLoading] = useState(false);
   const [replies, setReplies] = useState<Reply[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [updatedTarget, setUpdatedTarget] = useState<
     Post | { reply: Reply; replyCount: number } | null
   >(null);
+  const isOnComposeRoute = pathname.includes('compose');
 
   useEffect(() => {
-    if (pathname.includes('compose')) return;
+    if (isOnComposeRoute) return;
     const getReplies = async () => {
       let response;
+      setLoading(true);
       try {
         if (targetId && targetType) {
           response = await apiService.get(
@@ -54,9 +59,8 @@ export default function ReplyList({
                 ...axiosResponse?.data.replies,
               ]);
         }
-      } catch (error) {
-        console.log(error);
-      }
+        setLoading(false);
+      } catch (error) {}
     };
     getReplies();
   }, [
@@ -66,24 +70,26 @@ export default function ReplyList({
     user,
     updatedTarget,
     newUpdatedTarget,
-    pathname,
+    isOnComposeRoute,
     currentPage,
   ]);
 
-  return (
+  return loading && currentPage === 1 ? (
+    <LoadingScreen />
+  ) : (
     <Stack sx={{ width: '100%' }}>
       {!!replies?.length && (
         <InfiniteScroll
           dataLength={replies.length}
           next={() => setCurrentPage(currentPage + 1)}
           hasMore={replies.length >= 10 && currentPage < totalPages}
-          loader={<h4>Loading...</h4>}
+          loader={<LoadingScreen />}
         >
           {replies.map((reply) => (
             <ReplyCard
               key={reply._id}
               reply={reply}
-              direct={targetId ? true : false}
+              direct={!!targetId}
               setUpdatedTarget={setNewUpdatedTarget ?? setUpdatedTarget}
             />
           ))}

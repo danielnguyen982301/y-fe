@@ -1,11 +1,12 @@
 'use client';
 
+import { Box, Stack, Tab, Tabs } from '@mui/material';
+import { useSearchParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+
 import PostList from '@/app/ui/post/post-list';
 import SearchBar from '@/app/ui/search-bar';
 import UserList from '@/app/ui/user/user-list';
-import { Box, Stack, Tab, Tabs } from '@mui/material';
-import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
 
 export default function Page() {
   const [currentTab, setCurrentTab] = useState('People');
@@ -32,11 +33,10 @@ export default function Page() {
   }, [query]);
 
   return (
-    <Box sx={{ display: 'flex', width: '1050px' }}>
+    <Box sx={{ display: 'flex', width: { xs: '100%', sm: '1050px' } }}>
       <Stack
         sx={{
-          maxWidth: '600px',
-          width: '100%',
+          width: { xs: '100%', sm: '500px', lg: '600px' },
           borderRight: '1px solid rgb(239, 243, 244)',
         }}
       >
@@ -57,7 +57,7 @@ export default function Page() {
               key={tab.name}
               value={tab.name}
               label={tab.name}
-              sx={{ width: '50%' }}
+              sx={{ width: '50%', textTransform: 'none', fontWeight: 'bold' }}
             />
           ))}
         </Tabs>
@@ -65,6 +65,19 @@ export default function Page() {
           const isMatched = tab.name === currentTab;
           return isMatched && <Stack key={tab.name}>{tab.component}</Stack>;
         })}
+      </Stack>
+      <Stack
+        sx={{
+          display: { xs: 'none', sm: 'flex' },
+          width: '300px',
+          height: '100vh',
+          ml: '30px',
+          position: 'sticky',
+          top: 0,
+        }}
+        spacing={4}
+      >
+        <Box sx={{ width: '100%' }} />
       </Stack>
     </Box>
   );

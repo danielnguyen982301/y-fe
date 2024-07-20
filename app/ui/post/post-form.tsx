@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, Box, Button, Stack, Typography } from '@mui/material';
+import { Avatar, Box, Stack, Typography } from '@mui/material';
 import React, {
   Dispatch,
   SetStateAction,
@@ -9,19 +9,22 @@ import React, {
   useState,
 } from 'react';
 import * as Yup from 'yup';
-import FormProvider from '../form/form-provider';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDropzone } from 'react-dropzone';
-import MentionTextField from '../form/form-mention-textfield';
 import Image from 'next/image';
 import { CameraIcon, XCircleIcon } from '@heroicons/react/24/outline';
-import { Hashtag, Post, Reply, Thread } from '@/app/lib/definitions';
-import apiService from '@/app/lib/apiService';
-import { cloudinaryUpload } from '@/app/lib/utils';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { isEqual } from 'lodash';
+import { toast } from 'react-toastify';
+import { LoadingButton } from '@mui/lab';
+
+import FormProvider from '../form/form-provider';
+import MentionTextField from '../form/form-mention-textfield';
+import { Post, Reply, Thread } from '@/app/lib/definitions';
+import apiService from '@/app/lib/apiService';
+import { cloudinaryUpload } from '@/app/lib/utils';
 import socket from '@/app/lib/socket';
 
 const yupSchema = Yup.object().shape({
@@ -56,6 +59,7 @@ export default function PostForm({
 }) {
   const { data } = useSession();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const defaultValues: PostFormData = {
     content: '',
@@ -66,6 +70,7 @@ export default function PostForm({
     resolver: yupResolver(yupSchema),
     defaultValues,
   });
+
   const {
     handleSubmit,
     reset,
@@ -127,6 +132,7 @@ export default function PostForm({
     );
 
     let response;
+    setLoading(true);
     try {
       const bodyData: {
         content: string;
@@ -142,6 +148,7 @@ export default function PostForm({
 
       if (setNewPost || postModal) {
         response = await apiService.post('/posts', bodyData);
+        toast.success('Posted Sucessfully');
         if (setNewPost) {
           setNewPost(response.data);
         }
@@ -200,6 +207,7 @@ export default function PostForm({
           }`,
           bodyData,
         );
+        toast.success(`Edited ${editTargetType} Successfully`);
         if (editTargetType === 'Post') {
           await apiService.post('/hashtags', {
             hashtags: tagNames,
@@ -208,8 +216,10 @@ export default function PostForm({
         }
         router.back();
       }
+      setLoading(false);
       reset();
     } catch (error) {
+      toast.error('Something went wrong');
       console.log(error);
     }
   };
@@ -240,8 +250,6 @@ export default function PostForm({
         sx={{
           display: 'flex',
           width: '100%',
-          // px: '16px',
-          // borderBottom: '1px solid rgb(239, 243, 244)',
         }}
       >
         <Box sx={{ pt: '12px' }}>
@@ -304,21 +312,29 @@ export default function PostForm({
                 sx={{ width: '20px', height: '20px', cursor: 'pointer' }}
               >
                 <input {...getInputProps()} />
-                <CameraIcon />
+                <CameraIcon color="rgb(29, 155, 240)" />
               </Box>
               <Box>
                 {editTarget && editTargetType ? (
-                  <Button
+                  <LoadingButton
+                    loading={loading || isSubmitting}
+                    sx={{ textTransform: 'none', borderRadius: 9999 }}
                     variant="contained"
                     type="submit"
                     disabled={!isEditedContentDifferent}
                   >
                     Edit
-                  </Button>
+                  </LoadingButton>
                 ) : (
-                  <Button variant="contained" type="submit" disabled={!content}>
+                  <LoadingButton
+                    loading={loading || isSubmitting}
+                    sx={{ textTransform: 'none', borderRadius: 9999 }}
+                    variant="contained"
+                    type="submit"
+                    disabled={!content}
+                  >
                     {setNewReply ? 'Reply' : 'Post'}
-                  </Button>
+                  </LoadingButton>
                 )}
               </Box>
             </Box>

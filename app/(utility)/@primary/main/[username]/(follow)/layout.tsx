@@ -1,9 +1,11 @@
 'use client';
 
 import { Box, Stack, Tab, Tabs } from '@mui/material';
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode } from 'react';
+
+import SearchBar from '@/app/ui/search-bar';
+import TrendingTagList from '@/app/ui/side-search/trending-tag-list';
 
 export default function Layout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -22,11 +24,10 @@ export default function Layout({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <Box sx={{ display: 'flex', width: '1050px' }}>
+    <Box sx={{ display: 'flex', width: { xs: '100%', sm: '1050px' } }}>
       <Stack
         sx={{
-          maxWidth: '600px',
-          width: '100%',
+          width: { xs: '100%', sm: '500px', lg: '600px' },
           borderRight: '1px solid rgb(239, 243, 244)',
         }}
       >
@@ -36,24 +37,35 @@ export default function Layout({ children }: { children: ReactNode }) {
           scrollButtons="auto"
           variant="scrollable"
           allowScrollButtonsMobile
-          // onChange={(e, value) => setCurrentTab(value)}
         >
           {TABS.map((tab) => (
-            // <Link key={tab.name} href={`${segments.join('/')}/${tab.name}`}>
             <Tab
               disableRipple
               key={tab.name}
               value={tab.name}
               label={tab.name}
-              sx={{ width: '50%' }}
+              sx={{ width: '50%', textTransform: 'none', fontWeight: 'bold' }}
               onClick={() =>
                 router.push(`${segments.join('/')}/${tab.name.toLowerCase()}`)
               }
             />
-            // </Link>
           ))}
         </Tabs>
         {children}
+      </Stack>
+      <Stack
+        sx={{
+          display: { xs: 'none', md: 'flex' },
+          width: '300px',
+          height: '100vh',
+          ml: { lg: '20px', md: '10px' },
+          position: 'sticky',
+          top: 0,
+        }}
+        spacing={4}
+      >
+        <SearchBar query="" />
+        <TrendingTagList />
       </Stack>
     </Box>
   );

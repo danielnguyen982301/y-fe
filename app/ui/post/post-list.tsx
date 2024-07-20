@@ -1,15 +1,17 @@
 'use client';
 
-import apiService from '@/app/lib/apiService';
-import { Post, Reply, Thread, User } from '@/app/lib/definitions';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Box, Stack } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import PostCard from './post-card';
 import { ArrowPathRoundedSquareIcon } from '@heroicons/react/24/outline';
-import { useSession } from 'next-auth/react';
-import ReplyCard from '../reply/reply-card';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+
+import apiService from '@/app/lib/apiService';
+import { Post, Reply, Thread, User } from '@/app/lib/definitions';
+import PostCard from './post-card';
+import ReplyCard from '../reply/reply-card';
+import LoadingScreen from '../loading-screen';
 
 type PostListProps = {
   newPost?: Thread | null;
@@ -21,6 +23,7 @@ type PostListProps = {
 export default function PostList({ newPost, tab, query, user }: PostListProps) {
   const { data } = useSession();
   const pathname = usePathname();
+  const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState<Thread[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -32,6 +35,7 @@ export default function PostList({ newPost, tab, query, user }: PostListProps) {
     if (pathname.includes('compose')) return;
     if (!data?.currentUser || !!tab) return;
     const getNewPosts = async () => {
+      setLoading(true);
       try {
         const response = await apiService.get(
           `/posts/user/${data.currentUser._id}`,
@@ -44,10 +48,11 @@ export default function PostList({ newPost, tab, query, user }: PostListProps) {
           const postDate = new Date(post.createdAt as string);
           return Date.now() - postDate.getTime() < 1000 * 60 * 60 * 24;
         });
-        setPosts(newlyCreatedPosts);
-      } catch (error) {
-        console.log(error);
-      }
+        currentPage === 1
+          ? setPosts(newlyCreatedPosts)
+          : setPosts((prevState) => [...prevState, ...newlyCreatedPosts]);
+        setLoading(false);
+      } catch (error) {}
     };
     getNewPosts();
   }, [newPost, data, tab, pathname, updatedTarget, currentPage]);
@@ -57,6 +62,7 @@ export default function PostList({ newPost, tab, query, user }: PostListProps) {
     if (!tab) return;
     const getPosts = async () => {
       let response;
+      setLoading(true);
       try {
         if (tab === 'Following') {
           response = await apiService.get('/posts/followees', {
@@ -88,21 +94,22 @@ export default function PostList({ newPost, tab, query, user }: PostListProps) {
                 ...axiosResponse?.data.posts,
               ]);
         }
-      } catch (error) {
-        console.log(error);
-      }
+        setLoading(false);
+      } catch (error) {}
     };
     getPosts();
   }, [tab, query, user, newPost, pathname, updatedTarget, currentPage]);
 
-  return (
+  return loading && currentPage === 1 ? (
+    <LoadingScreen />
+  ) : (
     <Stack sx={{ width: '100%' }}>
       {!!posts.length && (
         <InfiniteScroll
           dataLength={posts.length}
           next={() => setCurrentPage(currentPage + 1)}
           hasMore={posts.length >= 10 && currentPage < totalPages}
-          loader={<h4>Loading...</h4>}
+          loader={<LoadingScreen />}
         >
           {posts.map((post) =>
             post.post ? (

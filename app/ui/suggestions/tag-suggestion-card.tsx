@@ -1,7 +1,8 @@
-import { Hashtag } from '@/app/lib/definitions';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Box, Typography } from '@mui/material';
 import React from 'react';
+
+import { Hashtag } from '@/app/lib/definitions';
 
 export default function TagSuggestionCard({ tag }: { tag: Hashtag }) {
   return (

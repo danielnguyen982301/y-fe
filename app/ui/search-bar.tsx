@@ -3,20 +3,14 @@
 import { XCircleIcon } from '@heroicons/react/20/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Box, Menu, MenuItem, TextField, Typography } from '@mui/material';
-import {
-  ChangeEvent,
-  Dispatch,
-  FormEvent,
-  SetStateAction,
-  useEffect,
-  useState,
-} from 'react';
-import { ChatUser, Hashtag, User } from '../lib/definitions';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useDebouncedCallback } from 'use-debounce';
+
+import { Hashtag, User } from '../lib/definitions';
 import apiService from '../lib/apiService';
 import TagSuggestionCard from './suggestions/tag-suggestion-card';
 import UserSuggestionCard from './suggestions/user-suggestion-card';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 export default function SearchBar({
   query,
@@ -40,7 +34,6 @@ export default function SearchBar({
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const searchContent = event.target.value;
-    setSearchText(searchContent);
     const regex = /(#\w+|#)|(@\w+|@)/g;
     const queries = [];
     let match;
@@ -79,6 +72,8 @@ export default function SearchBar({
     }
   };
 
+  const debounced = useDebouncedCallback((e) => handleSearchChange(e), 500);
+
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     if (chatUserSearch) return;
     event.preventDefault();
@@ -92,24 +87,6 @@ export default function SearchBar({
     router.push(`/main/${username}`);
   };
 
-  // const handleSelectChatUser = (user: User) => {
-  //   if (setSelectedChatUser && setChatUsers && chatUsers) {
-  //     const existingChatUser = chatUsers.find(
-  //       ({ userId }) => userId === user._id,
-  //     );
-  //     if (existingChatUser) {
-  //       setSelectedChatUser(existingChatUser);
-  //     } else {
-  //       const chatUser: ChatUser = {
-  //         ...user,
-  //         messages: [],
-  //       };
-  //       setChatUsers([chatUser, ...chatUsers]);
-  //       setSelectedChatUser(chatUser);
-  //     }
-  //   }
-  // };
-
   useEffect(() => {
     if (query) {
       setSearchText(query);
@@ -117,12 +94,15 @@ export default function SearchBar({
   }, [query]);
 
   return (
-    <form style={{ width: '350px' }} onSubmit={handleSearchSubmit}>
+    <form style={{ width: '300px' }} onSubmit={handleSearchSubmit}>
       <TextField
         autoComplete="off"
         value={searchText}
         placeholder="Search"
-        onChange={handleSearchChange}
+        onChange={(e) => {
+          debounced(e);
+          setSearchText(e.target.value);
+        }}
         sx={{
           border: 'none',
           width: '100%',
@@ -139,7 +119,7 @@ export default function SearchBar({
               style={{ width: '20px', height: '20px', marginRight: '15px' }}
             />
           ),
-          endAdornment: (
+          endAdornment: searchText && (
             <XCircleIcon style={{ width: '20px', height: '20px' }} />
           ),
         }}
@@ -163,7 +143,9 @@ export default function SearchBar({
       >
         <Box sx={{ width: 350 }}>
           {noResultFound && (
-            <Typography sx={{ p: 2 }}>Search for {searchText}</Typography>
+            <Typography sx={{ p: 2 }}>
+              No search results for {searchText}
+            </Typography>
           )}
           {!!tagSuggestions.length &&
             tagSuggestions.map((tag) => (
@@ -177,9 +159,7 @@ export default function SearchBar({
                   setAncholEl(null);
                 }}
               >
-                {/* <Link href={`/explore?q=${encodeURIComponent(`#${tag.name}`)}`}> */}
                 <TagSuggestionCard tag={tag} />
-                {/* </Link> */}
               </MenuItem>
             ))}
           {!!userSuggestions.length &&

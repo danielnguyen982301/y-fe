@@ -1,12 +1,13 @@
 'use client';
 
-import apiService from '@/app/lib/apiService';
-import { Hashtag, User } from '@/app/lib/definitions';
 import { Box, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Mention, MentionsInput, SuggestionDataItem } from 'react-mentions';
+import { useDebouncedCallback } from 'use-debounce';
+
+import apiService from '@/app/lib/apiService';
+import { Hashtag, User } from '@/app/lib/definitions';
 
 const defaultStyle = {
   '&multiLine': {
@@ -34,9 +35,7 @@ const defaultStyle = {
       fontSize: 15,
     },
     item: {
-      // fontWeight: 'bold',
       padding: '5px 15px',
-      // borderBottom: '1px solid rgba(0,0,0,0.15)',
       '&focused': {
         backgroundColor: 'rgba(0,0,0,0.03)',
       },
@@ -66,69 +65,6 @@ export const findLineBreaks = (input: string) => {
   }
   return parts;
 };
-
-// export const transformedContent = ({
-//   content,
-//   regex,
-//   isFormInput,
-// }: {
-//   content: string;
-//   regex: RegExp;
-//   isFormInput?: boolean;
-// }) => {
-//   let parts: any[] = [];
-//   let lastIndex = 0;
-//   let match;
-
-//   while ((match = regex.exec(content)) !== null) {
-//     if (lastIndex < match.index) {
-//       const contentPart = content.substring(lastIndex, match.index);
-//       parts = [...parts, ...findLineBreaks(contentPart)];
-//     }
-//     if (isFormInput) console.log(match);
-//     parts.push(
-//       isFormInput ? (
-//         <Typography
-//           component="span"
-//           sx={{
-//             color: 'rgb(29, 155, 240)',
-//             position: 'relative',
-//             zIndex: 100,
-//             fontSize: 20,
-//             fontFamily: 'inherit',
-//             letterSpacing: 'inherit',
-//           }}
-//           key={`${Date.now()} - ${Math.random()}`}
-//         >
-//           {match[1] || match[2]
-//             ? match[1]
-//               ? `#${match[1]}`
-//               : `#${match[2]}`
-//             : `@${match[4].split('-')[1]}`}
-//         </Typography>
-//       ) : (
-//         <Link
-//           onClick={(e) => e.stopPropagation()}
-//           prefetch={false}
-//           className="hover:underline"
-//           href={`/explore?q=${encodeURIComponent(match[1])}`}
-//           style={{ color: 'rgb(29, 155, 240)' }}
-//           key={`${Date.now()} - ${Math.random()}`}
-//         >
-//           {match[1]}
-//         </Link>
-//       ),
-//     );
-
-//     lastIndex = match.index + match[0].length;
-//   }
-
-//   if (lastIndex < content?.length) {
-//     const contentPart = content.substring(lastIndex);
-//     parts = [...parts, ...findLineBreaks(contentPart)];
-//   }
-//   return parts;
-// };
 
 export const transformedFormInput = (content: string) => {
   const regex = /#\[(\w+)\]|#(\w+)|@\((\w+)\)\[([\s\w\-]+)\]/gm;
@@ -246,6 +182,11 @@ export default function MentionTextField({
     }
   };
 
+  const debouncedHashtags = useDebouncedCallback(
+    (query, callback) => fetchHashtags(query, callback),
+    500,
+  );
+
   const fetchUsers = async (
     query: string,
     callback: (data: SuggestionDataItem[]) => void,
@@ -263,6 +204,11 @@ export default function MentionTextField({
       console.log(error);
     }
   };
+
+  const debouncedUsers = useDebouncedCallback(
+    (query, callback) => fetchUsers(query, callback),
+    500,
+  );
 
   const transformedInput = transformedFormInput(inputValue);
 
@@ -297,25 +243,22 @@ export default function MentionTextField({
           >
             <Mention
               style={{
-                // color: 'rgb(137 197 237)',
                 color: 'transparent',
               }}
               trigger="#"
-              data={fetchHashtags}
+              data={debouncedHashtags}
               displayTransform={(id, display) => `#${display}`}
               renderSuggestion={(suggestion) => (
                 <Box sx={{ py: 2 }}>#{suggestion.display}</Box>
               )}
               markup="#[__display__]"
-              // regex={/#(\w+)/}
             />
             <Mention
               style={{
-                // color: 'rgb(137 197 237)',
                 color: 'transparent',
               }}
               trigger="@"
-              data={fetchUsers}
+              data={debouncedUsers}
               displayTransform={(id, display) => `@${display.split('-')[1]}`}
               renderSuggestion={(suggestion) => (
                 <Stack sx={{ py: 2 }}>
@@ -330,7 +273,6 @@ export default function MentionTextField({
                 </Stack>
               )}
               markup="@(__id__)[__display__]"
-              // regex={/#(\w+)/}
             />
           </MentionsInput>
         </Box>

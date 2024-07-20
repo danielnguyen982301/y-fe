@@ -1,8 +1,6 @@
 'use server';
 
 import { auth, signIn, signOut } from '@/auth';
-import { AuthError } from 'next-auth';
-import apiService from './apiService';
 
 export async function authenticate(formData: {
   email: string;
@@ -18,13 +16,4 @@ export async function getSession() {
 
 export async function logOut() {
   await signOut({ redirectTo: '/login' });
-}
-
-export async function getHashtags() {
-  try {
-    const response = await apiService.get('/hashtags');
-    return response.data;
-  } catch (error) {
-    console.log(error);
-  }
 }

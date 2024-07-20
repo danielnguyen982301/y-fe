@@ -1,9 +1,10 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
+
 import apiService from '@/app/lib/apiService';
 import { Post, Reply } from '@/app/lib/definitions';
 import PostFormModal from '@/app/ui/modal/post-form-modal';
-import React, { useEffect, useState } from 'react';
 
 export default function Page({
   params,
@@ -24,9 +25,7 @@ export default function Page({
           }/original/${editTargetId}`,
         );
         setEditTarget(response.data);
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
     };
     getEditTarget();
   }, [editTargetType, editTargetId]);

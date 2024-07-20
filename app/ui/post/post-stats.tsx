@@ -1,8 +1,5 @@
 'use client';
 
-import apiService from '@/app/lib/apiService';
-import { Post } from '@/app/lib/definitions';
-import socket from '@/app/lib/socket';
 import {
   BookmarkIcon,
   ChartBarIcon,
@@ -15,9 +12,19 @@ import {
   HeartIcon as UnlikedHeart,
 } from '@heroicons/react/24/outline';
 import { Box, Tooltip, Typography } from '@mui/material';
-import { pick } from 'lodash';
-import { useSession } from 'next-auth/react';
 import React, { useEffect, useMemo, useState } from 'react';
+
+import apiService from '@/app/lib/apiService';
+import { Post } from '@/app/lib/definitions';
+import socket from '@/app/lib/socket';
+
+const iconStyles = {
+  width: 40,
+  height: 40,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
 
 export default function PostStats({
   post,
@@ -28,8 +35,6 @@ export default function PostStats({
   detailed?: boolean;
   newReplyCount?: number;
 }) {
-  const { data } = useSession();
-
   const stats = useMemo(
     () => ({
       likeCount: post?.likeCount,
@@ -138,11 +143,7 @@ export default function PostStats({
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Box
           sx={{
-            width: 40,
-            height: 40,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            ...iconStyles,
             color: 'rgb(83, 100, 113)',
             '&:hover': {
               cursor: 'pointer',
@@ -182,11 +183,7 @@ export default function PostStats({
               handleToggleRepost(post?._id);
             }}
             sx={{
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              ...iconStyles,
               color: postStates.isReposted
                 ? 'rgba(0,186,124)'
                 : 'rgb(83, 100, 113)',
@@ -237,11 +234,7 @@ export default function PostStats({
               handleToggleLike(post?._id);
             }}
             sx={{
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              ...iconStyles,
               color: postStates.isLiked
                 ? 'rgba(249,24,128)'
                 : 'rgb(83, 100, 113)',
@@ -278,11 +271,7 @@ export default function PostStats({
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Box
             sx={{
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              ...iconStyles,
             }}
           >
             <ChartBarIcon height="20px" width="20px" />
@@ -322,11 +311,7 @@ export default function PostStats({
               handleToggleBookmark(post?._id);
             }}
             sx={{
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              ...iconStyles,
               color: postStates.isBookmarked
                 ? 'rgba(29,155,240)'
                 : 'rgb(83, 100, 113)',

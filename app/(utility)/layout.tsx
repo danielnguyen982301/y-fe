@@ -1,7 +1,10 @@
-import { Box, Container, Stack } from '@mui/material';
+import { Container } from '@mui/material';
+
 import MainHeader from '../ui/layouts/main-header';
 import ChatProvider from '../ChatProvider';
 import NotificationProvider from '../NotificationProvider';
+import MobileMainHeader from '../ui/layouts/mobile-main-header';
+import AlertMsg from '../ui/alert-message';
 
 export default function Layout({
   modal,
@@ -15,12 +18,24 @@ export default function Layout({
   return (
     <NotificationProvider>
       <ChatProvider>
-        <Container maxWidth={false} sx={{ display: 'flex' }}>
+        <Container
+          maxWidth={false}
+          sx={{
+            width: '100%',
+            position: 'relative',
+            minHeight: '100vh',
+            display: 'flex',
+            p: { xs: 0 },
+            flexDirection: { xs: 'column', sm: 'row' },
+          }}
+        >
           {modal}
-          {/* <Box>{modal}</Box> */}
           <MainHeader />
-          {primary}
-          {children}
+          <AlertMsg />
+          <MobileMainHeader>
+            {primary}
+            {children}
+          </MobileMainHeader>
         </Container>
       </ChatProvider>
     </NotificationProvider>

@@ -1,23 +1,33 @@
 import { useSession } from 'next-auth/react';
-import React, { Dispatch, SetStateAction, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { useDropzone } from 'react-dropzone';
-import { Avatar, Box, Button, Stack, Typography } from '@mui/material';
+import { Avatar, Box, Stack } from '@mui/material';
 import { CameraIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import FormProvider from '../form/form-provider';
 import Image from 'next/image';
-import FTextField from '../form/form-textfield';
 import { useRouter } from 'next/navigation';
-import apiService from '@/app/lib/apiService';
 import { isEqual } from 'lodash';
+import { toast } from 'react-toastify';
+import { LoadingButton } from '@mui/lab';
+
+import FormProvider from '../form/form-provider';
+import FTextField from '../form/form-textfield';
+import apiService from '@/app/lib/apiService';
 import { cloudinaryUpload } from '@/app/lib/utils';
 
 const yupSchema = Yup.object().shape({
-  displayName: Yup.string().required('Display Name is required'),
-  bio: Yup.string().optional(),
-  location: Yup.string().optional(),
+  displayName: Yup.string()
+    .min(6, 'Display name must have at least 6 characters')
+    .max(30, 'Display can only have maximum of 30 characters')
+    .required('Display Name is required'),
+  bio: Yup.string()
+    .length(160, 'Bio can only have maximum of 160 characters')
+    .optional(),
+  location: Yup.string()
+    .length(30, 'Location can only have maximum of 30 characters')
+    .optional(),
 });
 
 type ImageFileWithPreview = File & { preview: string };
@@ -33,6 +43,8 @@ type ProfileUpdateData = {
 export default function UserProfileUpdateForm() {
   const { data, update } = useSession();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
   const defaultValues: ProfileUpdateData = {
     avatar: data?.currentUser.avatar ?? null,
     header: data?.currentUser.avatar ?? null,
@@ -45,10 +57,15 @@ export default function UserProfileUpdateForm() {
     defaultValues,
   });
 
-  const { handleSubmit, resetField, setValue, watch } = methods;
+  const {
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { isSubmitting },
+  } = methods;
 
   const updateData = watch();
-  const { avatar, header, displayName, location, bio } = updateData;
+  const { avatar, header } = updateData;
   const initialUserData = {
     displayName: data?.currentUser.displayName,
     avatar: data?.currentUser.avatar,
@@ -110,6 +127,7 @@ export default function UserProfileUpdateForm() {
     if (header && typeof header === 'object') {
       headerData = await cloudinaryUpload(header as File);
     }
+    setLoading(true);
     try {
       await apiService.put(`/users/${data?.currentUser._id}`, {
         ...updateDetails,
@@ -126,8 +144,11 @@ export default function UserProfileUpdateForm() {
           },
         },
       });
+      setLoading(false);
+      toast.success('Update Profile Successfully');
       router.back();
     } catch (error) {
+      toast.error('Something went wrong');
       console.log(error);
     }
   };
@@ -158,13 +179,23 @@ export default function UserProfileUpdateForm() {
           </Box>
           <Box sx={{ flexGrow: 1, fontWeight: 'bold' }}>Edit Profile</Box>
           <Box>
-            <Button
+            <LoadingButton
+              loading={loading || isSubmitting}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 'bold',
+                borderRadius: 9999,
+                bgcolor: 'rgb(15, 20, 25)',
+                '&:hover': {
+                  bgcolor: 'rgb(39,44,48)',
+                },
+              }}
               variant="contained"
               type="submit"
               disabled={!isDataDifferent}
             >
               Save
-            </Button>
+            </LoadingButton>
           </Box>
         </Box>
         <Box sx={{ height: 200, width: '100%', position: 'relative' }}>

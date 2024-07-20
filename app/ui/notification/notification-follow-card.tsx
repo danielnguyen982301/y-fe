@@ -1,8 +1,8 @@
-import { User } from '@/app/lib/definitions';
 import { UserIcon } from '@heroicons/react/20/solid';
 import { Avatar, Box, Stack, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+
+import { User } from '@/app/lib/definitions';
 
 export default function NotificationFollowCard({
   sender,

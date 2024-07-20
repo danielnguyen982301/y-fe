@@ -1,11 +1,12 @@
 'use client';
 
-import apiService from '@/app/lib/apiService';
-import { Follow, User } from '@/app/lib/definitions';
-import socket from '@/app/lib/socket';
 import { Avatar, Box, Button, Stack, Typography } from '@mui/material';
 import { useSession } from 'next-auth/react';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { useState } from 'react';
+
+import apiService from '@/app/lib/apiService';
+import { User } from '@/app/lib/definitions';
+import socket from '@/app/lib/socket';
 
 export default function UserCard({ user }: { user: User }) {
   const { data } = useSession();
@@ -36,7 +37,7 @@ export default function UserCard({ user }: { user: User }) {
 
   return (
     <Box sx={{ display: 'flex', p: 2, width: '100%' }}>
-      <Box sx={{ mr: 2 }}>
+      <Box sx={{ mr: 1 }}>
         <Avatar src={user?.avatar} alt={user?.username} />
       </Box>
       <Stack sx={{ width: '100%' }}>
@@ -47,29 +48,61 @@ export default function UserCard({ user }: { user: User }) {
                 {user?.displayName}
               </Typography>
             </Box>
-            <Box>
-              <Typography sx={{ color: 'rgb(83, 100, 113)' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box
+                sx={{
+                  color: 'rgb(83, 100, 113)',
+                  maxWidth: { xs: isFollowing ? '100px' : '100%', md: 'none' },
+                  overflowX: 'hidden',
+                }}
+              >
                 @{user?.username}
-                {isFollowing && (
-                  <Typography
-                    component="span"
-                    sx={{
-                      ml: 0.5,
-                      fontSize: 11,
-                      color: 'rgb(83, 100, 113)',
-                      bgcolor: 'rgb(239, 243, 244)',
-                    }}
-                  >
-                    Follows you
-                  </Typography>
-                )}
-              </Typography>
+              </Box>
+              {isFollowing && (
+                <Box
+                  sx={{
+                    ml: 0.5,
+                    fontSize: 11,
+                    color: 'rgb(83, 100, 113)',
+                    bgcolor: 'rgb(239, 243, 244)',
+                  }}
+                >
+                  Follows you
+                </Box>
+              )}
             </Box>
           </Stack>
           {!isCurrentUser && (
             <Box>
               <Button
-                sx={{ width: '100px' }}
+                disableElevation
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  width: '100px',
+                  border: '1px solid',
+                  borderRadius: 9999,
+                  borderColor: !isFollowed
+                    ? 'white'
+                    : isHovered
+                    ? 'rgb(253,201,206)'
+                    : 'rgb(207, 217, 222)',
+                  color: !isFollowed
+                    ? 'white'
+                    : isHovered
+                    ? 'rgb(244,33,46)'
+                    : 'rgb(15, 20, 25)',
+                  bgcolor: !isFollowed
+                    ? 'rgb(15, 20, 25)'
+                    : isHovered
+                    ? 'rgba(244,33,46,0.1)'
+                    : 'white',
+                  '&:hover': {
+                    bgcolor: !isFollowed
+                      ? 'rgb(39,44,48)'
+                      : 'rgba(244,33,46,0.1)',
+                  },
+                }}
                 variant="contained"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}

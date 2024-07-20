@@ -1,16 +1,10 @@
 'use client';
 
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import {
-  ArrowPathRoundedSquareIcon,
-  EllipsisHorizontalIcon,
-} from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import apiService from '@/app/lib/apiService';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { Avatar, Box, Stack, Typography } from '@mui/material';
+
 import { ChatUser } from '@/app/lib/definitions';
-import { Avatar, Box, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import { transformedDateAndTime } from '@/app/lib/utils';
 
 export default function ChatUserCard({
@@ -24,8 +18,6 @@ export default function ChatUserCard({
 }) {
   const { data } = useSession();
   const router = useRouter();
-  const [anchorEl, setAncholEl] = useState<HTMLElement | null>(null);
-  const [openModal, setOpenModal] = useState(false);
   const unreadMessagesNumber = user.messages.filter(
     ({ isRead, from }) => !isRead && from !== data?.currentUser._id,
   ).length;
@@ -44,7 +36,6 @@ export default function ChatUserCard({
         <Box
           sx={{
             display: 'flex',
-            // position: 'relative',
             width: '100%',
             px: 2,
             py: 1,
@@ -54,12 +45,20 @@ export default function ChatUserCard({
             <Avatar src={user.avatar} alt={'user-avatar'} />
           </Stack>
           <Stack sx={{ flexGrow: 1, pl: 1 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Box>
+            <Box sx={{ display: 'flex' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/main/${user.username}`);
+                  }}
                   component="span"
                   sx={{
-                    pr: 1,
+                    mr: 0.5,
+                    display: 'inline-block',
+                    maxWidth: { xs: '100px', sm: '150px' },
+                    overflowX: 'hidden',
+                    whiteSpace: 'nowrap',
                     color: 'rgb(15, 20, 25)',
                     fontWeight: 'bold',
                     fontSize: 15,
@@ -72,8 +71,15 @@ export default function ChatUserCard({
                   {user.displayName}
                 </Typography>
                 <Typography
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/main/${user.username}`);
+                  }}
                   component="span"
                   sx={{
+                    display: 'inline-block',
+                    maxWidth: { xs: '100px', sm: '150px' },
+                    overflowX: 'hidden',
                     color: 'rgb(83, 100, 113)',
                     fontSize: 15,
                     '&:hover': {
@@ -92,7 +98,7 @@ export default function ChatUserCard({
                       fontSize: 15,
                       '&::before': {
                         content: `"•"`,
-                        mx: 1,
+                        mx: 0.5,
                       },
                     }}
                   >
@@ -101,38 +107,6 @@ export default function ChatUserCard({
                     )}
                   </Typography>
                 )}
-              </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  position: 'relative',
-                  right: 8,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    position: 'absolute',
-                    alignItems: 'center',
-                    height: '40px',
-                    width: '40px',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      bgcolor: 'rgba(29,155,240,0.1)',
-                      color: 'rgb(29,155,240)',
-                      borderRadius: '50%',
-                    },
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setAncholEl(e.currentTarget);
-                  }}
-                >
-                  <EllipsisHorizontalIcon width={25} height={25} />
-                </Box>
               </Box>
             </Box>
             {!!user.messages.length && (
@@ -155,47 +129,6 @@ export default function ChatUserCard({
           </Stack>
         </Box>
       </Stack>
-      {/* <Menu
-        sx={{ mt: 3 }}
-        onClick={() => setAncholEl(null)}
-        id="menu-appbar"
-        anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        keepMounted
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        open={Boolean(anchorEl)}
-        onClose={() => setAncholEl(null)}
-      >
-        {data?.currentUser._id === post?.author._id ? (
-          <Box>
-            <MenuItem
-              sx={{ fontWeight: 'bold' }}
-              onClick={() => router.push(`/compose/edit/post/${post._id}`)}
-            >
-              Edit
-            </MenuItem>
-            <MenuItem
-              sx={{ fontWeight: 'bold' }}
-              onClick={() => setOpenModal(true)}
-            >
-              Delete
-            </MenuItem>
-          </Box>
-        ) : (
-          <MenuItem
-            sx={{ fontWeight: 'bold' }}
-            onClick={() => handleToggleFollow(post?.author._id)}
-          >
-            {isFollowed ? 'Unfollow' : 'Follow'} @{post?.author.username}
-          </MenuItem>
-        )}
-      </Menu> */}
     </>
   );
 }

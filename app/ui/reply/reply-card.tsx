@@ -1,18 +1,15 @@
 'use client';
 
-import { Post, Reply, Thread } from '@/app/lib/definitions';
-import { Avatar, Box, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import NextImage from 'next/image';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import {
-  ArrowPathRoundedSquareIcon,
-  EllipsisHorizontalIcon,
-} from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import apiService from '@/app/lib/apiService';
+import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
+import { Avatar, Box, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import { useSession } from 'next-auth/react';
-import ReplyStats from './reply-stats';
 import { useRouter } from 'next/navigation';
+
+import { Post, Reply } from '@/app/lib/definitions';
+import apiService from '@/app/lib/apiService';
+import ReplyStats from './reply-stats';
 import { transformedContent } from '../form/form-mention-textfield';
 import DeleteConfirmModal from '../modal/delete-confirm-modal';
 import { transformedDateAndTime } from '@/app/lib/utils';
@@ -118,7 +115,7 @@ export default function ReplyCard({
           </Stack>
           <Stack sx={{ flexGrow: 1, pl: 1 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography
                   onClick={(e) => {
                     e.stopPropagation();
@@ -126,7 +123,11 @@ export default function ReplyCard({
                   }}
                   component="span"
                   sx={{
-                    pr: 1,
+                    mr: 0.5,
+                    display: 'inline-block',
+                    maxWidth: { xs: '100px', sm: 'none' },
+                    overflowX: 'hidden',
+                    whiteSpace: 'nowrap',
                     color: 'rgb(15, 20, 25)',
                     fontWeight: 'bold',
                     fontSize: 15,
@@ -145,6 +146,9 @@ export default function ReplyCard({
                   }}
                   component="span"
                   sx={{
+                    display: 'inline-block',
+                    maxWidth: { xs: '100px', sm: 'none' },
+                    overflowX: 'hidden',
                     color: 'rgb(83, 100, 113)',
                     fontSize: 15,
                     '&:hover': {
@@ -163,7 +167,7 @@ export default function ReplyCard({
                     fontSize: 15,
                     '&::before': {
                       content: `"•"`,
-                      mx: 1,
+                      mx: 0.5,
                     },
                   }}
                 >
@@ -231,8 +235,6 @@ export default function ReplyCard({
               <Box
                 sx={{
                   display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
                   pb: 1,
                 }}
               >

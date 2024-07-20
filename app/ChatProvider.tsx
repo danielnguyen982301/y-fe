@@ -43,7 +43,6 @@ export default function ChatProvider({ children }: { children: ReactNode }) {
   ).length;
 
   useEffect(() => {
-    // if (!data || !isValidToken(data.accessToken)) return;
     const getChatUsers = async () => {
       try {
         const response = await apiService.get('/messages/users');

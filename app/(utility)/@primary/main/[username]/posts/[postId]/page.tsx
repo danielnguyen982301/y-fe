@@ -1,18 +1,24 @@
 'use client';
 
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { Box, Stack } from '@mui/material';
+import { usePathname, useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+
 import apiService from '@/app/lib/apiService';
 import { Post, Reply } from '@/app/lib/definitions';
-import PostCard from '@/app/ui/post/post-card';
+import LoadingScreen from '@/app/ui/loading-screen';
 import PostDetails from '@/app/ui/post/post-details';
 import PostForm from '@/app/ui/post/post-form';
 import ReplyList from '@/app/ui/reply/reply-list';
-import { Box, Stack } from '@mui/material';
-import { usePathname } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import SearchBar from '@/app/ui/search-bar';
+import TrendingTagList from '@/app/ui/side-search/trending-tag-list';
 
 export default function Page({ params }: { params: { postId: string } }) {
   const { postId } = params;
   const pathname = usePathname();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [newReply, setNewReply] = useState<{
     reply: Reply;
@@ -22,19 +28,20 @@ export default function Page({ params }: { params: { postId: string } }) {
     Post | { reply: Reply; replyCount: number } | null
   >(null);
   const [newReplyCount, setNewReplyCount] = useState(selectedPost?.replyCount);
+  const isOnComposeRoute = pathname.includes('compose');
 
   useEffect(() => {
-    if (pathname.includes('compose')) return;
+    if (isOnComposeRoute) return;
     const getSinglePost = async () => {
+      setLoading(true);
       try {
         const response = await apiService.get(`/posts/original/${postId}`);
         setSelectedPost(response.data);
-      } catch (error) {
-        console.log(error);
-      }
+        setLoading(false);
+      } catch (error) {}
     };
     getSinglePost();
-  }, [postId, pathname]);
+  }, [postId, isOnComposeRoute]);
 
   useEffect(() => {
     setNewReplyCount(
@@ -47,32 +54,54 @@ export default function Page({ params }: { params: { postId: string } }) {
   }, [newReply]);
 
   return (
-    <Box sx={{ display: 'flex', width: '1050px' }}>
+    <Box sx={{ display: 'flex', width: { xs: '100%', sm: '1050px' } }}>
       <Stack
         sx={{
-          maxWidth: '600px',
-          width: '100%',
+          width: { xs: '100%', sm: '500px', lg: '600px' },
           borderRight: '1px solid rgb(239, 243, 244)',
         }}
       >
-        <PostDetails
-          post={selectedPost as Post}
-          newReplyCount={newReplyCount}
-        />
-        <PostForm
-          setNewReply={setNewReply}
-          replyTargetType="Post"
-          replyTarget={selectedPost as Post}
-        />
-        <ReplyList
-          targetType="Post"
-          targetId={postId}
-          newReply={newReply?.reply}
-          setNewUpdatedTarget={setUpdatedTarget}
-          newUpdatedTarget={
-            updatedTarget as { reply: Reply; replyCount: number }
-          }
-        />
+        <Box onClick={() => router.back()} sx={{ px: 1, pt: 1 }}>
+          <ArrowLeftIcon width={20} height={20} />
+        </Box>
+        {loading ? (
+          <LoadingScreen />
+        ) : (
+          <>
+            <PostDetails
+              post={selectedPost as Post}
+              newReplyCount={newReplyCount}
+            />
+            <PostForm
+              setNewReply={setNewReply}
+              replyTargetType="Post"
+              replyTarget={selectedPost as Post}
+            />
+            <ReplyList
+              targetType="Post"
+              targetId={postId}
+              newReply={newReply?.reply}
+              setNewUpdatedTarget={setUpdatedTarget}
+              newUpdatedTarget={
+                updatedTarget as { reply: Reply; replyCount: number }
+              }
+            />
+          </>
+        )}
+      </Stack>
+      <Stack
+        sx={{
+          display: { xs: 'none', md: 'flex' },
+          width: '300px',
+          height: '100vh',
+          ml: { lg: '20px', md: '10px' },
+          position: 'sticky',
+          top: 0,
+        }}
+        spacing={4}
+      >
+        <SearchBar query="" />
+        <TrendingTagList />
       </Stack>
     </Box>
   );

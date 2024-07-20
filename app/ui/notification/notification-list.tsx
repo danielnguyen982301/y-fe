@@ -1,10 +1,8 @@
 'use client';
 
-import apiService from '@/app/lib/apiService';
-import { Follow, Notification, Post, Reply, User } from '@/app/lib/definitions';
-import { useNotif } from '@/app/lib/hooks';
 import { Stack } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+
+import { Notification, Post, Reply } from '@/app/lib/definitions';
 import PostCard from '../post/post-card';
 import ReplyCard from '../reply/reply-card';
 import NotificationRepostCard from './notification-repost-card';

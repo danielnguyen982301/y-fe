@@ -1,18 +1,15 @@
 'use client';
 
-import { Post, Reply, Thread } from '@/app/lib/definitions';
 import { Avatar, Box, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import NextImage from 'next/image';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import PostStats from './post-stats';
-import {
-  ArrowPathRoundedSquareIcon,
-  EllipsisHorizontalIcon,
-} from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import apiService from '@/app/lib/apiService';
+import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+
+import { Post, Reply } from '@/app/lib/definitions';
+import PostStats from './post-stats';
+import apiService from '@/app/lib/apiService';
 import DeleteConfirmModal from '../modal/delete-confirm-modal';
 import { transformedContent } from '../form/form-mention-textfield';
 import { transformedDateAndTime } from '@/app/lib/utils';
@@ -114,7 +111,7 @@ export default function PostCard({
           </Stack>
           <Stack sx={{ flexGrow: 1, pl: 1 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography
                   onClick={(e) => {
                     e.stopPropagation();
@@ -122,7 +119,11 @@ export default function PostCard({
                   }}
                   component="span"
                   sx={{
-                    pr: 1,
+                    mr: 0.5,
+                    display: 'inline-block',
+                    maxWidth: { xs: '100px', sm: 'none' },
+                    overflowX: 'hidden',
+                    whiteSpace: 'nowrap',
                     color: 'rgb(15, 20, 25)',
                     fontWeight: 'bold',
                     fontSize: 15,
@@ -141,6 +142,9 @@ export default function PostCard({
                   }}
                   component="span"
                   sx={{
+                    display: 'inline-block',
+                    maxWidth: { xs: '100px', sm: 'none' },
+                    overflowX: 'hidden',
                     color: 'rgb(83, 100, 113)',
                     fontSize: 15,
                     '&:hover': {
@@ -158,7 +162,7 @@ export default function PostCard({
                     fontSize: 15,
                     '&::before': {
                       content: `"•"`,
-                      mx: 1,
+                      mx: 0.5,
                     },
                   }}
                 >
@@ -203,8 +207,6 @@ export default function PostCard({
               <Box
                 sx={{
                   display: 'flex',
-                  // justifyContent: 'center',
-                  // alignItems: 'center',
                   pb: 1,
                 }}
               >

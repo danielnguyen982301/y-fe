@@ -1,14 +1,15 @@
 'use client';
 
-import apiService from '@/app/lib/apiService';
-import { User } from '@/app/lib/definitions';
-import socket from '@/app/lib/socket';
 import { CalendarDaysIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Avatar, Box, Button, Stack, Typography } from '@mui/material';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+
+import apiService from '@/app/lib/apiService';
+import { User } from '@/app/lib/definitions';
+import socket from '@/app/lib/socket';
 
 export default function UserProfile({ user }: { user: User }) {
   const { data } = useSession();
@@ -58,7 +59,7 @@ export default function UserProfile({ user }: { user: User }) {
             alt={user.username}
             width={600}
             height={200}
-            style={{ width: 600, height: 200 }}
+            style={{ width: '100%', height: 200 }}
           />
         )}
       </Box>
@@ -82,17 +83,48 @@ export default function UserProfile({ user }: { user: User }) {
               onClick={() => router.push('/settings/profile')}
               variant="outlined"
               sx={{
+                textTransform: 'none',
                 borderRadius: 9999,
-                borderColor: 'lightgray',
+                border: '1px solid rgb(207, 217, 222)',
                 color: 'black',
                 fontWeight: 'bold',
+                '&:hover': {
+                  bgcolor: 'rgba(15,20,25,0.1)',
+                },
               }}
             >
               Set up profile
             </Button>
           ) : (
             <Button
-              sx={{ width: '100px' }}
+              disableElevation
+              sx={{
+                textTransform: 'none',
+                fontWeight: 'bold',
+                width: '100px',
+                border: '1px solid',
+                borderRadius: 9999,
+                borderColor: !isFollowed
+                  ? 'white'
+                  : isHovered
+                  ? 'rgb(253,201,206)'
+                  : 'rgb(207, 217, 222)',
+                color: !isFollowed
+                  ? 'white'
+                  : isHovered
+                  ? 'rgb(244,33,46)'
+                  : 'rgb(15, 20, 25)',
+                bgcolor: !isFollowed
+                  ? 'rgb(15, 20, 25)'
+                  : isHovered
+                  ? 'rgba(244,33,46,0.1)'
+                  : 'white',
+                '&:hover': {
+                  bgcolor: !isFollowed
+                    ? 'rgb(39,44,48)'
+                    : 'rgba(244,33,46,0.1)',
+                },
+              }}
               variant="contained"
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}

@@ -11,16 +11,15 @@ import {
 import { LoadingButton } from '@mui/lab';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import Link from 'next/link';
+
 import FormProvider from '@/app/ui/form/form-provider';
 import FTextField from '@/app/ui/form/form-textfield';
 import FCheckbox from '@/app/ui/form/form-checkbox';
 import { authenticate } from '@/app/lib/actions';
-import socket from '@/app/lib/socket';
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email').required('Email is required'),
@@ -58,8 +57,6 @@ export default function Page() {
 
     try {
       await authenticate({ email, password });
-      // socket.auth = { username: user.username };
-      // socket.connect();
     } catch (error) {
       reset();
       setError('root.responseError', {
@@ -76,7 +73,10 @@ export default function Page() {
             <Alert severity="error">{errors.root.responseError.message}</Alert>
           )}
           <Alert severity="info">
-            Don’t have an account? <Link href="/register">Get started</Link>
+            Don’t have an account?{' '}
+            <Link href="/register" className="text-blue-600 underline">
+              Get started
+            </Link>
           </Alert>
 
           <FTextField name="email" label="Email address" />
@@ -107,7 +107,7 @@ export default function Page() {
           sx={{ my: 2 }}
         >
           <FCheckbox name="remember" label="Remember me" />
-          <Link href="/">Forgot password?</Link>
+          <Link href="/login">Forgot password?</Link>
         </Stack>
 
         <LoadingButton

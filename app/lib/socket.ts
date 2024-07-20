@@ -1,12 +1,6 @@
 'use client';
 
-import { Socket, io } from 'socket.io-client';
-
-// type ServerToClientEvents = {
-//   session: (session: { sessionId: string; userId: string }) => void;
-// }
-
-// type SocketAndUserId = Socket & { userId?: string };
+import { io } from 'socket.io-client';
 
 const URL = 'http://localhost:5000';
 const socket = io(URL, { autoConnect: false });

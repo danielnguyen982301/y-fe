@@ -2,31 +2,26 @@
 
 import {
   HomeIcon,
-  MagnifyingGlassCircleIcon,
   BellAlertIcon,
   EnvelopeIcon,
   BookmarkIcon,
   UserIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 import { Box, Typography } from '@mui/material';
 import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
-import socket from '@/app/lib/socket';
-import { ChatUser } from '@/app/lib/definitions';
-import apiService from '@/app/lib/apiService';
+
 import { useChat, useNotif } from '@/app/lib/hooks';
 
-// Map of links to display in the side navigation.
-// Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: 'Home', href: '/main/home', icon: HomeIcon },
   {
     name: 'Explore',
     href: '/main/explore',
-    icon: MagnifyingGlassCircleIcon,
+    icon: MagnifyingGlassIcon,
   },
   { name: 'Notifications', href: '/main/notifications', icon: BellAlertIcon },
   { name: 'Messages', href: '/main/messages', icon: EnvelopeIcon },
@@ -47,13 +42,13 @@ export default function NavLinks() {
         if (link.name === 'Profile')
           link.href = `/main/${data?.currentUser?.username}`;
         return (
-          <Box key={link.name} sx={{ py: 1 }}>
+          <Box key={link.name}>
             <Link
               href={link.href as string}
               className={clsx(
-                'flex h-[48px] grow items-center justify-center gap-5 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
+                'flex h-[48px] grow items-center gap-5 rounded-full p-3 text-sm font-medium hover:bg-slate-200',
                 {
-                  'bg-sky-100 text-blue-600': pathname === link.href,
+                  'bg-slate-200': pathname === link.href,
                 },
               )}
             >
@@ -88,7 +83,13 @@ export default function NavLinks() {
                 )}
                 <LinkIcon className="w-6" />
               </Box>
-              <Typography className="hidden md:block" sx={{ fontSize: '20px' }}>
+              <Typography
+                sx={{
+                  display: { xs: 'none', lg: 'block' },
+                  fontSize: '20px',
+                  fontWeight: pathname === link.href ? 'bold' : 'none',
+                }}
+              >
                 {link.name}
               </Typography>
             </Link>
