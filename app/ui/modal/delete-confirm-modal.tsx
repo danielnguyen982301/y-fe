@@ -3,7 +3,6 @@
 import { Box, Button, Modal, Stack, Typography } from '@mui/material';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { omit } from 'lodash';
 import { toast } from 'react-toastify';
 import { LoadingButton } from '@mui/lab';
 
@@ -54,11 +53,12 @@ export default function DeleteConfirmModal({
       toast.success(`Deleted ${targetType} Successfully`);
       socket.emit('deleteNotif', response.data.notifRecipients);
       if (setUpdatedTarget) {
-        setUpdatedTarget(
-          targetType === 'post'
-            ? response.data.post
-            : omit(response.data, ['notifRecipients']),
-        );
+        if (targetType === 'post') {
+          setUpdatedTarget(response.data.post);
+        } else {
+          delete response.data.notifRecipients;
+          setUpdatedTarget(response.data);
+        }
       }
       if (chainedOrDetailed) {
         router.push('/main/home');

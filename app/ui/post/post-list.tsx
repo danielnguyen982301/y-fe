@@ -149,13 +149,11 @@ export default function PostList({ newPost, tab, query, user }: PostListProps) {
                 </Box>
                 {post.repostType === 'Post' ? (
                   <PostCard
-                    key={post._id}
                     post={post.repost as Post}
                     setUpdatedTarget={setUpdatedTarget}
                   />
                 ) : (
                   <ReplyCard
-                    key={post._id}
                     reply={post.repost as Reply}
                     setUpdatedTarget={setUpdatedTarget}
                   />
