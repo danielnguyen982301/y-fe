@@ -80,7 +80,6 @@ export default function Page() {
       });
       await authenticate({ email, password });
     } catch (error) {
-      reset();
       setError('root.responseError', {
         message: 'Something went wrong',
       });

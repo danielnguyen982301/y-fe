@@ -54,11 +54,9 @@ export default function Page() {
 
   const onSubmit = async (data: LoginData) => {
     let { email, password } = data;
-
     try {
       await authenticate({ email, password });
     } catch (error) {
-      reset();
       setError('root.responseError', {
         message: 'Either email or password is incorrect',
       });

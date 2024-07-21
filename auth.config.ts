@@ -1,10 +1,9 @@
-import type { DefaultSession, NextAuthConfig, Session } from 'next-auth';
-import jwt from 'jsonwebtoken';
+import type { NextAuthConfig } from 'next-auth';
 import 'next-auth/jwt';
-import { isValidToken } from './app/lib/utils';
-import { signOut } from 'next-auth/react';
-import { User as CurrentUser } from './app/lib/definitions';
 import { omit } from 'lodash';
+
+import { isValidToken } from './app/lib/utils';
+import { User as CurrentUser } from './app/lib/definitions';
 
 declare module 'next-auth/jwt' {
   interface JWT {
@@ -71,5 +70,5 @@ export const authConfig = {
   session: {
     maxAge: 24 * 60 * 60,
   },
-  providers: [], // Add providers with an empty array for now
+  providers: [],
 } satisfies NextAuthConfig;

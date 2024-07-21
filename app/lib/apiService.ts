@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { getSession } from './actions';
+import { BASE_URL } from './config';
 
 const apiService = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_API,
+  baseURL: BASE_URL,
 });
 
 apiService.interceptors.request.use(
