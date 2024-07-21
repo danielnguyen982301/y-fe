@@ -67,9 +67,7 @@ export default function SearchBar({
         setUserSuggestions(userResponse.data.users);
         setAncholEl(event.target);
       }
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   const debounced = useDebouncedCallback((e) => handleSearchChange(e), 500);

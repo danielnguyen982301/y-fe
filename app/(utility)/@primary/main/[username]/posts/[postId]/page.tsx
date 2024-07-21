@@ -61,7 +61,10 @@ export default function Page({ params }: { params: { postId: string } }) {
           borderRight: '1px solid rgb(239, 243, 244)',
         }}
       >
-        <Box onClick={() => router.back()} sx={{ px: 1, pt: 1 }}>
+        <Box
+          onClick={() => router.back()}
+          sx={{ px: 1, pt: 1, cursor: 'pointer' }}
+        >
           <ArrowLeftIcon width={20} height={20} />
         </Box>
         {loading ? (

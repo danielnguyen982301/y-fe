@@ -67,9 +67,7 @@ export default function ReplyCard({
           : response.data.notif,
       );
       setIsFollowed(!isFollowed);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   return (

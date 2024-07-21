@@ -47,9 +47,7 @@ export default function ChatProvider({ children }: { children: ReactNode }) {
       try {
         const response = await apiService.get('/messages/users');
         setChatUsers(response.data.chatUsers);
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
     };
     getChatUsers();
   }, []);

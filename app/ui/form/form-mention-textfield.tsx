@@ -177,9 +177,7 @@ export default function MentionTextField({
         (hashtag: Hashtag) => ({ id: hashtag._id, display: hashtag.name }),
       );
       callback(transformedData);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   const debouncedHashtags = useDebouncedCallback(
@@ -200,9 +198,7 @@ export default function MentionTextField({
         display: `${user.displayName}-${user.username}`,
       }));
       callback(transformedData);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   const debouncedUsers = useDebouncedCallback(

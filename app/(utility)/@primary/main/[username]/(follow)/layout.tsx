@@ -2,6 +2,7 @@
 
 import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import React, { ReactNode } from 'react';
 
 import SearchBar from '@/app/ui/search-bar';
@@ -31,10 +32,16 @@ export default function Layout({ children }: { children: ReactNode }) {
           borderRight: '1px solid rgb(239, 243, 244)',
         }}
       >
+        <Box
+          onClick={() => router.back()}
+          sx={{ px: 1, pt: 1, cursor: 'pointer' }}
+        >
+          <ArrowLeftIcon width={20} height={20} />
+        </Box>
         <Tabs
           sx={{ borderBottom: '1px solid rgb(239, 243, 244)', width: '100%' }}
           value={tab}
-          scrollButtons="auto"
+          scrollButtons={false}
           variant="scrollable"
           allowScrollButtonsMobile
         >

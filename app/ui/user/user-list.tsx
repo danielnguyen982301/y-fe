@@ -55,9 +55,7 @@ export default function UserList({
               ]);
         }
         setLoading(false);
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
     };
     getUsers();
   }, [query, tab, selectedUser, currentPage]);

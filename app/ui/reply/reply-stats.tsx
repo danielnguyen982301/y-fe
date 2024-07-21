@@ -71,9 +71,7 @@ export default function ReplyStats({
       });
       setReplyStats({ ...replyStats, likeCount: response.data.likeCount });
       setReplyStates({ ...replyStates, isLiked: !replyStates.isLiked });
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   const handleToggleRepost = async (replyId: string) => {
@@ -99,9 +97,7 @@ export default function ReplyStats({
       }
       setReplyStats({ ...replyStats, repostCount: response.data.repostCount });
       setReplyStates({ ...replyStates, isReposted: !replyStates.isReposted });
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   const handleToggleBookmark = async (replyId: string) => {
@@ -127,9 +123,7 @@ export default function ReplyStats({
         ...replyStates,
         isBookmarked: !replyStates.isBookmarked,
       });
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   return (

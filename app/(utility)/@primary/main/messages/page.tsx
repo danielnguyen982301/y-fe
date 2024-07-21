@@ -55,9 +55,7 @@ export default function Page() {
           return user;
         }),
       );
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   const handleSelectChatUserFromSuggestions = async (selectedUser: User) => {

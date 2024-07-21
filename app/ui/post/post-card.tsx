@@ -63,9 +63,7 @@ export default function PostCard({
           : response.data.notif,
       );
       setIsFollowed(!isFollowed);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   return (

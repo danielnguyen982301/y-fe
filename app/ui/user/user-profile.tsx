@@ -39,17 +39,16 @@ export default function UserProfile({ user }: { user: User }) {
           : response.data.notif,
       );
       setIsFollowed(!isFollowed);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   return (
     <Stack sx={{ width: '100%' }}>
       <Box
         sx={{
+          position: 'relative',
           width: '100%',
-          height: '200px',
+          height: { xs: '120px', sm: '200px' },
           backgroundColor: user?.header ? '' : 'rgb(207, 217, 222)',
         }}
       >
@@ -57,9 +56,9 @@ export default function UserProfile({ user }: { user: User }) {
           <Image
             src={user.header}
             alt={user.username}
-            width={600}
-            height={200}
-            style={{ width: '100%', height: 200 }}
+            fill
+            priority
+            sizes="100%"
           />
         )}
       </Box>
@@ -72,12 +71,22 @@ export default function UserProfile({ user }: { user: User }) {
           }}
         >
           <Avatar
-            sx={{ width: 140, height: 140, border: '4px solid white' }}
+            sx={{
+              width: { xs: 80, sm: 140 },
+              height: { xs: 80, sm: 140 },
+              border: '3px solid white',
+            }}
             src={user?.avatar}
             alt={user?.username}
           />
         </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            p: { xs: 1, sm: 2 },
+          }}
+        >
           {user?._id === data?.currentUser._id ? (
             <Button
               onClick={() => router.push('/settings/profile')}
@@ -135,7 +144,7 @@ export default function UserProfile({ user }: { user: User }) {
           )}
         </Box>
       </Box>
-      <Stack sx={{ p: 2 }}>
+      <Stack sx={{ px: 2, py: { xs: 1, sm: 2 } }}>
         <Box>
           <Typography sx={{ fontWeight: 'bold' }}>
             {user?.displayName}

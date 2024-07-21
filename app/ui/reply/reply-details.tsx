@@ -59,9 +59,7 @@ export default function ReplyDetails({
           : response.data.notif,
       );
       setIsFollowed(!isFollowed);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   return (

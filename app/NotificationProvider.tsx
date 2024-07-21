@@ -53,9 +53,7 @@ export default function NotificationProvider({
             ({ isRead }: { isRead: boolean }) => !isRead,
           ).length,
         );
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
     };
     getNotifs();
   }, [actionCount]);

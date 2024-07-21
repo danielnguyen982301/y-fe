@@ -21,7 +21,9 @@ export default function MobileMainHeader({
   const { data } = useSession();
   const isChatting = pathname.includes('messages') && selectedChatUser;
   const showTopHeaderCondition =
-    !pathname.includes('posts') && !pathname.includes('replies');
+    !pathname.includes('posts') &&
+    !pathname.includes('replies') &&
+    !pathname.includes(data?.currentUser.username as string);
 
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 

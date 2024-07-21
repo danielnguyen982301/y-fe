@@ -30,9 +30,7 @@ export default function UserCard({ user }: { user: User }) {
           : response.data.notif,
       );
       setIsFollowed(!isFollowed);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   return (

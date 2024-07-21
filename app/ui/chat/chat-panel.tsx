@@ -91,7 +91,11 @@ export default function ChatPanel({
       <Box sx={{ display: 'flex', alignItems: 'center', px: 1, pt: 1 }}>
         <Box
           onClick={() => setSelectedChatUser(null)}
-          sx={{ display: { xs: 'block', md: 'none' }, mr: 4 }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            mr: 4,
+            cursor: 'pointer',
+          }}
         >
           <ArrowLeftIcon width={20} height={20} />
         </Box>

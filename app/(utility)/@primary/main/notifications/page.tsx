@@ -44,9 +44,7 @@ export default function Page() {
     const updateNotifStatus = async () => {
       try {
         await apiService.put('/notifications/status', { notifs: unreadNotifs });
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
     };
     updateNotifStatus();
   }, [unreadNotifs, setNotifs, setUnreadNotifCount]);

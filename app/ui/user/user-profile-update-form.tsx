@@ -46,11 +46,11 @@ export default function UserProfileUpdateForm() {
   const [loading, setLoading] = useState(false);
 
   const defaultValues: ProfileUpdateData = {
-    avatar: data?.currentUser.avatar ?? null,
-    header: data?.currentUser.avatar ?? null,
-    displayName: data?.currentUser.displayName as string,
-    bio: data?.currentUser.bio ?? '',
-    location: data?.currentUser.bio ?? '',
+    avatar: null,
+    header: null,
+    displayName: '',
+    bio: '',
+    location: '',
   };
   const methods = useForm<ProfileUpdateData>({
     resolver: yupResolver(yupSchema),
@@ -149,7 +149,6 @@ export default function UserProfileUpdateForm() {
       router.back();
     } catch (error) {
       toast.error('Something went wrong');
-      console.log(error);
     }
   };
 
@@ -201,6 +200,7 @@ export default function UserProfileUpdateForm() {
         <Box sx={{ height: 200, width: '100%', position: 'relative' }}>
           <Box
             sx={{
+              position: 'relative',
               width: '100%',
               height: '200px',
               backgroundColor: header ? '' : 'rgb(207, 217, 222)',
@@ -212,8 +212,10 @@ export default function UserProfileUpdateForm() {
                   (header as ImageFileWithPreview)?.preview ??
                   (header as string)
                 }
+                priority
                 alt={'user-header'}
                 fill
+                sizes="100%"
               />
             )}
           </Box>

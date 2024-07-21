@@ -69,7 +69,10 @@ export default function Page({ params }: { params: { username: string } }) {
                 <Box
                   sx={{ display: 'flex', alignItems: 'center', px: 1, pt: 1 }}
                 >
-                  <Box onClick={() => router.back()} sx={{ mr: 4 }}>
+                  <Box
+                    onClick={() => router.back()}
+                    sx={{ mr: 4, cursor: 'pointer' }}
+                  >
                     <ArrowLeftIcon width={20} height={20} />
                   </Box>
                   <Stack>
