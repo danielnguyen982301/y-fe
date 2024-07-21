@@ -1,6 +1,5 @@
 import type { NextAuthConfig } from 'next-auth';
 import 'next-auth/jwt';
-import { omit } from 'lodash';
 
 import { isValidToken } from './app/lib/utils';
 import { User as CurrentUser } from './app/lib/definitions';
@@ -8,14 +7,14 @@ import { User as CurrentUser } from './app/lib/definitions';
 declare module 'next-auth/jwt' {
   interface JWT {
     accessToken: string;
-    currentUser: CurrentUser;
+    currentUser: Omit<CurrentUser, 'accessToken'>;
   }
 }
 
 declare module 'next-auth' {
   interface Session {
     accessToken: string;
-    currentUser: CurrentUser;
+    currentUser: Omit<CurrentUser, 'accessToken'>;
   }
   interface User {
     accessToken: string;
@@ -50,8 +49,10 @@ export const authConfig = {
     },
     async jwt({ token, user, session, trigger }) {
       if (user) {
+        const currentUser = { ...user } as Omit<CurrentUser, 'accessToken'>;
+        delete currentUser.accessToken;
         token.accessToken = user.accessToken;
-        token.currentUser = { ...(omit(user, 'accessToken') as CurrentUser) };
+        token.currentUser = currentUser;
       }
       if (trigger === 'update' && session?.currentUser) {
         token.currentUser = session.currentUser;
