@@ -12,22 +12,18 @@ apiService.interceptors.request.use(
     if (session && session.accessToken) {
       req.headers.Authorization = `Bearer ${session.accessToken}`;
     }
-    console.log('Request', req);
     return req;
   },
   function (err) {
-    console.log('Request Error', err);
     return Promise.reject(err);
   },
 );
 
 apiService.interceptors.response.use(
   (res) => {
-    console.log('Response', res);
     return res.data;
   },
   function (err) {
-    console.log('Response Error', err);
     const message = err.response?.data?.errors?.message || 'Unknown Error';
     return Promise.reject({ message });
   },

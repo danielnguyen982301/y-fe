@@ -30,19 +30,22 @@ export default function PostList({ newPost, tab, query, user }: PostListProps) {
   const [updatedTarget, setUpdatedTarget] = useState<
     Post | { reply: Reply; replyCount: number } | null
   >(null);
+  const [currentUserId, setCurrentUserId] = useState(data?.currentUser._id);
+
+  useEffect(() => {
+    if (!data) return;
+    setCurrentUserId(data.currentUser._id);
+  }, [data]);
 
   useEffect(() => {
     if (pathname.includes('compose')) return;
-    if (!data?.currentUser || !!tab) return;
+    if (!currentUserId || !!tab) return;
     const getNewPosts = async () => {
       setLoading(true);
       try {
-        const response = await apiService.get(
-          `/posts/user/${data.currentUser._id}`,
-          {
-            params: { original: true, page: currentPage },
-          },
-        );
+        const response = await apiService.get(`/posts/user/${currentUserId}`, {
+          params: { original: true, page: currentPage },
+        });
         setTotalPages(response.data.totalPages);
         const newlyCreatedPosts = response.data.posts.filter((post: Thread) => {
           const postDate = new Date(post.createdAt as string);
@@ -55,7 +58,7 @@ export default function PostList({ newPost, tab, query, user }: PostListProps) {
       } catch (error) {}
     };
     getNewPosts();
-  }, [newPost, data, tab, pathname, updatedTarget, currentPage]);
+  }, [newPost, currentUserId, tab, pathname, updatedTarget, currentPage]);
 
   useEffect(() => {
     if (pathname.includes('compose')) return;
@@ -120,7 +123,7 @@ export default function PostList({ newPost, tab, query, user }: PostListProps) {
               />
             ) : post.repost ? (
               <Stack key={post._id} sx={{ width: '100%' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', px: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
                   <Box
                     sx={{
                       width: 40,

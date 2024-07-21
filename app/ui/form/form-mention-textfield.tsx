@@ -35,7 +35,7 @@ const defaultStyle = {
       fontSize: 15,
     },
     item: {
-      padding: '5px 15px',
+      padding: '5px 10px',
       '&focused': {
         backgroundColor: 'rgba(0,0,0,0.03)',
       },
@@ -249,7 +249,7 @@ export default function MentionTextField({
               data={debouncedHashtags}
               displayTransform={(id, display) => `#${display}`}
               renderSuggestion={(suggestion) => (
-                <Box sx={{ py: 2 }}>#{suggestion.display}</Box>
+                <Box sx={{ py: 1 }}>#{suggestion.display}</Box>
               )}
               markup="#[__display__]"
             />
