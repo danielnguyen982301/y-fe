@@ -8,6 +8,7 @@ import { Avatar, Box, Stack } from '@mui/material';
 import { CameraIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { isEqual } from 'lodash';
 import { toast } from 'react-toastify';
 import { LoadingButton } from '@mui/lab';
 
@@ -38,8 +39,6 @@ type ProfileUpdateData = {
   bio?: string;
   location?: string;
 };
-
-type UpdateDataKeys = 'avatar' | 'header' | 'displayName' | 'bio' | 'location';
 
 export default function UserProfileUpdateForm() {
   const { data, update } = useSession();
@@ -74,11 +73,7 @@ export default function UserProfileUpdateForm() {
     bio: data?.currentUser.bio,
     location: data?.currentUser.location,
   };
-  const isDataDifferent = Object.keys(initialUserData).some(
-    (key) =>
-      initialUserData[key as UpdateDataKeys] !==
-      updateData[key as UpdateDataKeys],
-  );
+  const isDataDifferent = !isEqual(updateData, initialUserData);
 
   const avatarDropzone = useDropzone({
     accept: {

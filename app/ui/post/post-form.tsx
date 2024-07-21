@@ -16,6 +16,7 @@ import Image from 'next/image';
 import { CameraIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { isEqual } from 'lodash';
 import { toast } from 'react-toastify';
 import { LoadingButton } from '@mui/lab';
 
@@ -109,11 +110,7 @@ export default function PostForm({
     content: editTarget?.content,
     mediaFile: editTarget?.mediaFile,
   };
-  const isEditedContentDifferent = Object.keys(initialTargetContent).some(
-    (key) =>
-      initialTargetContent[key as 'content' | 'mediaFile'] !==
-      formData[key as 'content' | 'mediaFile'],
-  );
+  const isEditedContentDifferent = !isEqual(initialTargetContent, formData);
   const isReply = replyTarget || (editTarget && editTargetType === 'Reply');
 
   const onSubmit = async (formData: PostFormData) => {
