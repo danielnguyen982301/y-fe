@@ -23,10 +23,12 @@ const yupSchema = Yup.object().shape({
     .max(30, 'Display can only have maximum of 30 characters')
     .required('Display Name is required'),
   bio: Yup.string()
-    .length(160, 'Bio can only have maximum of 160 characters')
+    .min(0)
+    .max(160, 'Bio can only have maximum of 160 characters')
     .optional(),
   location: Yup.string()
-    .length(30, 'Location can only have maximum of 30 characters')
+    .min(0)
+    .max(30, 'Location can only have maximum of 30 characters')
     .optional(),
 });
 
