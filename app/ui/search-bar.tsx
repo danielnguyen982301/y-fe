@@ -92,7 +92,10 @@ export default function SearchBar({
   }, [query]);
 
   return (
-    <form style={{ width: '300px' }} onSubmit={handleSearchSubmit}>
+    <form
+      style={{ width: '300px', marginTop: '8px' }}
+      onSubmit={handleSearchSubmit}
+    >
       <TextField
         autoComplete="off"
         value={searchText}
