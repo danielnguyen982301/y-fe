@@ -93,7 +93,7 @@ export default function SearchBar({
 
   return (
     <form
-      style={{ width: '300px', marginTop: '8px' }}
+      style={{ width: '300px', marginTop: '8px', marginBottom: '8px' }}
       onSubmit={handleSearchSubmit}
     >
       <TextField
