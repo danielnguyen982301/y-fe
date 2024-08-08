@@ -121,7 +121,10 @@ export default function SearchBar({
             />
           ),
           endAdornment: searchText && (
-            <XCircleIcon style={{ width: '20px', height: '20px' }} />
+            <XCircleIcon
+              onClick={() => setSearchText('')}
+              style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+            />
           ),
         }}
       />
