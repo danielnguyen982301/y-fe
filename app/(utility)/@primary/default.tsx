@@ -3,13 +3,12 @@ import { Box, Stack } from '@mui/material';
 
 export default function Default() {
   return (
-    <Box sx={{ display: 'flex', width: '1050px' }}>
+    <Box sx={{ display: 'flex', width: { xs: '100%', sm: '1050px' } }}>
       <Stack
         sx={{
           height: '100vh',
           justifyContent: 'space-between',
-          maxWidth: '600px',
-          width: '100%',
+          width: { xs: '100%', sm: '500px', lg: '600px' },
           borderRight: '1px solid rgb(239, 243, 244)',
         }}
       >
