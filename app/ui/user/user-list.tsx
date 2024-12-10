@@ -30,7 +30,7 @@ export default function UserList({
       try {
         if (tab === 'People' && !query?.startsWith('#')) {
           response = await apiService.get('/users', {
-            params: { searchText: query },
+            params: { searchText: query, page: currentPage },
           });
         }
         if (tab === 'Followers' && selectedUser) {
